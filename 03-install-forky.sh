@@ -327,7 +327,9 @@ pkgs_mango_niri=(
     vim
     libwlroots-0.20-dev
     libcjson-dev
-    librust-pangocairo-dev
+    libpcre2-dev
+    libpango1.0-dev
+    libxcb-randr0-dev
     pipewire
     wireplumber
     pipewire-alsa
@@ -1047,7 +1049,7 @@ install_selected() {
 
                 mango)
                     sudo apt install -y "${pkgs_mango_niri[@]}"
-                    sudo apt install -y foot || check_error "No se pudo instalar mango"
+                    sudo apt install -y foot || check_error "No se pudo instalar foot."
 
                     # Compilar e instalar mango
 
@@ -1057,10 +1059,10 @@ install_selected() {
                     fi
 
                     cd /tmp
-                    git clone -b 0.5 https://github.com/wlrfx/scenefx.git
+                    git clone -b 0.5 https://github.com/wlrfx/scenefx.git || check_error "No se pudo clonar scenefx."
                     cd /tmp/scenefx
-                    meson build -Dprefix=/usr
-                    sudo ninja -C build install
+                    meson build -Dprefix=/usr || check_error "No se pudo compilar scenefx (meson build)."
+                    sudo ninja -C build install || check_error "No se pudo instalar scenefx."
 
                     if [ -d "/tmp/mango" ]; then
                         echo "borrando directorio temporal de mango"
@@ -1068,10 +1070,10 @@ install_selected() {
                     fi
 
                     cd /tmp
-                    git clone -b 0.14.4 https://github.com/mangowm/mango.git
+                    git clone -b 0.17.5 https://github.com/mangowm/mango.git || check_error "No se pudo clonar mango."
                     cd mango
-                    meson build -Dprefix=/usr
-                    sudo ninja -C build install
+                    meson build -Dprefix=/usr || check_error "No se pudo compilar mango (meson build)."
+                    sudo ninja -C build install || check_error "No se pudo instalar mango."
 
                     backup_if_exists "$HOME/.config/mango"
                     if [ -d "$HOME/.config/mango" ]; then
@@ -1098,9 +1100,9 @@ install_selected() {
 
                     if [[ "$MAQUINA_VIRTUAL" == "si" ]]; then
                             if [ -f "/usr/share/wayland-sessions/mango.desktop" ]; then
+		                        backup_system_if_exists "/usr/share/wayland-sessions/mango.desktop"
 				                sudo rm -r /usr/share/wayland-sessions/mango.desktop
 				                cd $REPOLOCAL/usr/share/wayland-sessions
-		                        backup_system_if_exists "/usr/share/wayland-sessions/mango.desktop"
 				                sudo cp mango.desktop /usr/share/wayland-sessions/ || check_error "No se pudieron copiar los dotfiles a ~/.config."
 		               		fi
                     fi
@@ -1181,9 +1183,9 @@ install_selected() {
 
                     if [[ "$MAQUINA_VIRTUAL" == "si" ]]; then
                             if [ -f "/usr/share/wayland-sessions/sway.desktop" ]; then
+		                        backup_system_if_exists "/usr/share/wayland-sessions/sway.desktop"
 				                sudo rm -r /usr/share/wayland-sessions/sway.desktop
 				                cd $REPOLOCAL/usr/share/wayland-sessions
-		                        backup_system_if_exists "/usr/share/wayland-sessions/sway.desktop"
 				                sudo cp sway.desktop /usr/share/wayland-sessions/ || check_error "No se pudieron copiar los dotfiles a ~/.config."
 		               		fi
                     fi

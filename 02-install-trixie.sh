@@ -1165,9 +1165,9 @@ install_selected() {
 
                     if [[ "$MAQUINA_VIRTUAL" == "si" ]]; then
                             if [ -f "/usr/share/wayland-sessions/sway.desktop" ]; then
+				    backup_system_if_exists "/usr/share/wayland-sessions/sway.desktop"
 				    sudo rm -r /usr/share/wayland-sessions/sway.desktop
 				    cd $REPOLOCAL/usr/share/wayland-sessions
-				    backup_system_if_exists "/usr/share/wayland-sessions/sway.desktop"
 				    sudo cp sway.desktop /usr/share/wayland-sessions/ || check_error "No se pudieron copiar los dotfiles a ~/.config."
 				fi
                     fi
