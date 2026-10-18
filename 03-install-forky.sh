@@ -1226,6 +1226,10 @@ install_selected() {
                     # check_error "No se pudo instalar SDDM." || exit 1
 		    sudo systemctl enable --force sddm.service
                     # check_error "No se pudo activar SDDM." || exit 1
+                    # Configurar el tema maui (sin esto SDDM queda con el tema default)
+                    if ! grep -qs "^Current=maui" /etc/sddm.conf 2>/dev/null; then
+                        echo -e "[Theme]\nCurrent=maui" | sudo tee -a /etc/sddm.conf >/dev/null
+                    fi
                     ;;
 
                 ly)
