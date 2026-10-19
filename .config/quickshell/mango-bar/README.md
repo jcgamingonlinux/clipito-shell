@@ -1,4 +1,4 @@
-# Claudito Shell — variante Mango WM
+# Clipito Shell — variante Mango WM
 
 Mismo set de módulos que las variantes de Hyprland/niri/Sway (barra,
 launcher, notificaciones, power menu, wallpaper picker con Wallhaven,
@@ -80,7 +80,7 @@ Con quickshell corriendo en una terminal (para ver los `console.log`):
    `~/.config/mango/config.conf` (confirmado en la wiki, "quick-start") —
    si vos la moviste, ajustá `configPath` en el archivo o avisame.
 
-## Atajos de Claudito Shell (mismos en las 4 variantes)
+## Atajos de Clipito Shell (mismos en las 4 variantes)
 
 | Atajo | Acción |
 |---|---|

@@ -1,8 +1,8 @@
-# Claudeito Shell — Fixes aplicados (2026-10-14)
+# Clipito Shell — Fixes aplicados (2026-10-14)
 
 (fork de `https://gitlab.com/linux-en-casa/claudito-shell`).
 
-Publicado como fork: `https://github.com/jcgamingonlinux/claudeito-shell` (main).
+Publicado como fork: `https://github.com/jcgamingonlinux/clipito-shell` (main).
 
 ## Bugs corregidos
 

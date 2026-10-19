@@ -276,7 +276,7 @@ layout {
 // aunque creo que solo aplica en Debian
 spawn-at-startup "sh" "-c" "$HOME/.config/niri/matar-waybar.sh"
 
-// Iniciar Claudito Shell con script para que se vean todos los iconos
+// Iniciar Clipito Shell con script para que se vean todos los iconos
 spawn-at-startup "sh" "-c" "$HOME/.config/quickshell/niri-bar/launch-with-icon-theme.sh"
 
 
@@ -382,12 +382,12 @@ binds {
 
 
 
-    //  Wallpaper picker creado por Claudito
+    //  Wallpaper picker creado por Clipito
     Mod+Alt+W hotkey-overlay-title="Wallpaper Picker" {
         spawn "quickshell" "-c" "niri-bar" "ipc" "call" "wallpaper" "toggle"; }
     
     //  Launcher de aplicaciones centrado	
-    Mod+Alt+D hotkey-overlay-title="Launcher by Claudito" {
+    Mod+Alt+D hotkey-overlay-title="Launcher by Clipito" {
         spawn "quickshell" "-c" "niri-bar" "ipc" "call" "launcher" "toggle"; }
     
     //  power menu	

@@ -1,8 +1,8 @@
-# Claudito Shell
+# Clipito Shell
 
 **Un escritorio completo para tu compositor Wayland —barra, launcher, notificaciones, menú de energía, fondos de pantalla y más— con la misma experiencia en niri, Sway, Hyprland y mango.**
 
-![Claudito Shell](./imagenes/capibara-claudito.png)
+![Clipito Shell](./imagenes/capibara-clipito.png)
 
 Hecho con [Quickshell](https://quickshell.org) · 
 Software libre (GPLv3) · 
@@ -54,15 +54,15 @@ Script Desarrollado en su mayoría con Claude Code y mostrado en los directos de
 
 **Ir directo a:** [Instalación](#instalación) · [Configuración](#configuración) · [Solución de problemas](#solución-de-problemas) · [Todas las características](#características-en-detalle)
 
-![Claudito Shell: barra y launcher de aplicaciones](./imagenes/menu-launcher.png)
+![Clipito Shell: barra y launcher de aplicaciones](./imagenes/menu-launcher.png)
 
-## Por qué Claudito Shell
+## Por qué Clipito Shell
 
-Claudito Shell no es solo una barra: es todo lo que un escritorio necesita, integrado, configurable desde su propia interfaz y con el mismo comportamiento sin importar el compositor que uses.
+Clipito Shell no es solo una barra: es todo lo que un escritorio necesita, integrado, configurable desde su propia interfaz y con el mismo comportamiento sin importar el compositor que uses.
 
 ### Una sola instalación en lugar de muchas piezas sueltas
 
-| Lo que necesitás | Lo que se suele instalar por separado | En Claudito Shell |
+| Lo que necesitás | Lo que se suele instalar por separado | En Clipito Shell |
 | --- | --- | --- |
 | Barra | Waybar, swaybar | Barra integrada, con módulos que podés mover y ocultar |
 | Lanzador de aplicaciones | Wofi, Rofi | Launcher integrado |
@@ -87,7 +87,7 @@ Todo comparte el mismo diseño y es una única configuración de Quickshell para
 
 ## Índice
 
-- [Por qué Claudito Shell](#por-qué-claudito-shell)
+- [Por qué Clipito Shell](#por-qué-clipito-shell)
 - [Instalación](#instalación)
   - [Compatibilidad](#compatibilidad)
   - [Requisitos](#requisitos)
@@ -159,8 +159,8 @@ Según los módulos que uses:
 Son scripts en bash que usan `dialog` para los menús interactivos. Descargá el repositorio y ejecutá el que corresponda a tu distribución:
 
 ```sh
-git clone https://github.com/jcgamingonlinux/claudeito-shell.git
-cd claudeito-shell
+git clone https://github.com/jcgamingonlinux/clipito-shell.git
+cd clipito-shell
 bash 01-install-arch.sh        # Arch Linux
 # bash 02-install-trixie.sh    # Debian 13 Trixie
 # bash 03-install-forky.sh     # Debian 14 Forky
@@ -361,7 +361,7 @@ qs -c sway-bar ipc call bar-config toggle
 
 ## Características en detalle
 
-Todo lo que incluye Claudito Shell, módulo por módulo.
+Todo lo que incluye Clipito Shell, módulo por módulo.
 
 ### La barra en sí
 
@@ -655,7 +655,7 @@ teclado, `Ctrl+Shift+1..9` hace lo mismo que el click derecho.
 
 ## Sobre el proyecto
 
-Claudito Shell está hecho con [Quickshell](https://quickshell.org) y tiene cuatro variantes que
+Clipito Shell está hecho con [Quickshell](https://quickshell.org) y tiene cuatro variantes que
 comparten casi todo el código y el diseño, adaptadas cada una a su compositor Wayland (ver
 [Compatibilidad](#compatibilidad)). Cada carpeta es autocontenida: se copia entera a
 `~/.config/quickshell/` y funciona sola.

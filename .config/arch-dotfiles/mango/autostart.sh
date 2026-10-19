@@ -13,7 +13,7 @@ systemctl --user restart xdg-desktop-portal &
 # wlr-randr --output Virtual-1 --mode 1440x900 --pos 0,0 --transform normal --scale 1
 
 
-# --- Arranque de Claudito Shell con Mango ---
+# --- Arranque de Clipito Shell con Mango ---
 # Usá esta línea EN VEZ de "exec-once = qs -c mango-bar" a secas, para que
 # detecte el tema de íconos GTK igual que en las otras 3 variantes.
 ~/.config/quickshell/mango-bar/launch-with-icon-theme.sh

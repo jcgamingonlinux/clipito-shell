@@ -300,7 +300,7 @@ layout {
 // script para matar waybar y una ventana que aparece a veces
 spawn-at-startup "sh" "-c" "$HOME/.config/niri/matar-waybar.sh"
 
-// Iniciar Claudito Shell con script para que se vean todos los iconos
+// Iniciar Clipito Shell con script para que se vean todos los iconos
 spawn-at-startup "sh" "-c" "$HOME/.config/quickshell/niri-bar/launch-with-icon-theme.sh"
 
 
@@ -403,12 +403,12 @@ binds {
     Mod+Return hotkey-overlay-title="Alacritty" { spawn "alacritty"; }
     // Mod+D hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel"; }
 
-    //  @title Wallpaper picker by Claudito
+    //  @title Wallpaper picker by Clipito
     Mod+Alt+W hotkey-overlay-title="Wallpaper Picker" {
         spawn "quickshell" "-c" "niri-bar" "ipc" "call" "wallpaper" "toggle"; }
     
     //  @title Launcher de aplicaciones centrado	
-    Mod+Alt+D hotkey-overlay-title="Launcher by Claudito" {
+    Mod+Alt+D hotkey-overlay-title="Launcher by Clipito" {
         spawn "quickshell" "-c" "niri-bar" "ipc" "call" "launcher" "toggle"; }
     
     //  @title Power Menu	
@@ -698,7 +698,7 @@ binds {
 }
 
 
-// iniciar la shell sencilla creada con Claudito
+// iniciar la shell sencilla creada con Clipito
 
 // spawn-at-startup "qs" "-c" "niri-bar"
 

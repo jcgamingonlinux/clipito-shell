@@ -1,4 +1,4 @@
-// Configuración de Claudito Shell para Niri.
+// Configuración de Clipito Shell para Niri.
 
 // This config is in the KDL format: https://kdl.dev
 // "/-" comments out the following node.
@@ -278,7 +278,7 @@ layout {
 // aunque creo que solo aplica en Debian
 spawn-at-startup "sh" "-c" "$HOME/.config/niri/matar-waybar.sh"
 
-// Iniciar Claudito Shell con script para que se vean todos los iconos
+// Iniciar Clipito Shell con script para que se vean todos los iconos
 spawn-at-startup "sh" "-c" "$HOME/.config/quickshell/niri-bar/launch-with-icon-theme.sh"
 
 

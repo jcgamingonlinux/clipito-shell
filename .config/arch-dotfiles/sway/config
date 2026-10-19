@@ -1,4 +1,4 @@
-# Configuración de Claudito Shell para sway
+# Configuración de Clipito Shell para sway
 
 # Copy this to ~/.config/sway/config and edit it to your liking.
 #
@@ -303,7 +303,7 @@ bindsym $mod+r mode "resize"
 # }
 
 
-# Barra Claudito Shell - QuickShell
+# Barra Clipito Shell - QuickShell
 exec ~/.config/quickshell/sway-bar/launch-with-icon-theme.sh
 
 # variable de entorno - para los iconos gtk en quickshell

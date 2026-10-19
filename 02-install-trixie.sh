@@ -5,7 +5,7 @@ set -euo pipefail
 # Advertencia - Versión en pruebas -
 # Agradecemos la revisión y los comentarios
 
-# Script integrado para instalación y configuración de "Claudito Shell" en Linux Debian 13 Trixie
+# Script integrado para instalación y configuración de "Clipito Shell" en Linux Debian 13 Trixie
 # Combina un menú interactivo (dialog) con instalación robusta de 3 Wayland Compositors,
 # Hyprland, Niri y Sway WM.  Además se tienen disponibles unos packs de software, Básico, Intermedio y Full.
 # Septiembre de 2026 - Probado en: https://www.youtube.com/@LinuxenCasa
@@ -46,7 +46,7 @@ animate_text() {
 #
 clear
 animate_text "###################################"
-animate_text "      Claudito Shell - Trixie"
+animate_text "      Clipito Shell - Trixie"
 animate_text "###################################"
 sleep 0.2
 echo "Script integrado para instalación y"
@@ -143,10 +143,10 @@ MAQUINA_VIRTUAL="no"
 #
 REPOGITLAB="${REPOGITLAB:-https://gitlab.com/linux-en-casa/claudito-shell.git}"
 # REPOGITLAB="git@gitlab.com:linux-en-casa/claudito-shell.git"
-REPOLOCAL="${REPOLOCAL:-/tmp/claudito-shell}"
+REPOLOCAL="${REPOLOCAL:-/tmp/clipito-shell}"
 
 # Modo prueba local: si el script se ejecuta desde la raiz de un checkout de
-# claudito-shell, usar ese directorio en vez de clonar desde GitLab. Asi se
+# clipito-shell, usar ese directorio en vez de clonar desde GitLab. Asi se
 # puede probar este repo sin subirlo.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd)"
 REPO_EN_LOCAL="no"
@@ -370,7 +370,7 @@ backup_if_exists() {
 # Copia (no mueve) el archivo existente a BACKUPDIR preservando la estructura.
 # Registra el ítem en el mismo manifiesto que backup_if_exists.
 # Uso:  backup_system_if_exists "/usr/local/bin/KeyHintsBSPWM"
-#       backup_system_if_exists "/usr/share/wallpapers/claudito-01.png"
+#       backup_system_if_exists "/usr/share/wallpapers/clipito-01.png"
 backup_system_if_exists() {
     local target="$1"
     if [[ -e "$target" || -L "$target" ]]; then
@@ -819,7 +819,7 @@ show_leeme_menu() {
 
     local msg="\
 
-Script de Instalación \"Claudito Shell - Trixie\"
+Script de Instalación \"Clipito Shell - Trixie\"
 y Software para Debian GNU/Linux 13/Trixie - 64 Bits.
 
 youtube.com/@LinuxenCasa
@@ -960,8 +960,8 @@ install_selected() {
     backup_if_exists "$HOME/.config/gtk-3.0"
     cp -r gtk-3.0/ ~/.config/ || check_error "No se pudieron copiar los dotfiles a ~/.config."
     cd $REPOLOCAL/usr/share/wallpapers/
-    backup_system_if_exists "/usr/share/wallpapers/claudito-01.png"
-    sudo cp claudito-01.png /usr/share/wallpapers/ || check_error "No se pudo copiar el fondo de pantalla a /usr/share/wallpapers."
+    backup_system_if_exists "/usr/share/wallpapers/clipito-01.png"
+    sudo cp clipito-01.png /usr/share/wallpapers/ || check_error "No se pudo copiar el fondo de pantalla a /usr/share/wallpapers."
 
     ###############################
 
@@ -1018,7 +1018,7 @@ install_selected() {
     # de lo contrario no arranca la configuración de los WC.
     ########################################################################
 
-    for file in   "$HOME/wallpapers/claudito-01.png" "$HOME/.config/quickshell/bar-layout.tsv" \
+    for file in   "$HOME/wallpapers/clipito-01.png" "$HOME/.config/quickshell/bar-layout.tsv" \
                "$HOME/.config/quickshell/launcher-size.txt" "$HOME/.config/quickshell/wallpaper-fillmode.txt" \
 	       "$HOME/.config/quickshell/wallpaper-path.txt" "$HOME/.config/quickshell/shell.qml"; do
 
@@ -1031,7 +1031,7 @@ install_selected() {
 
     cd $REPOLOCAL/.config/quickshell
     cp bar-layout.tsv launcher-size.txt wallpaper-fillmode.txt wallpaper-path.txt ~/.config/quickshell || check_error "No se pudieron copiar los archivos de configuracion del WC de quickshell"
-    cp $REPOLOCAL/wallpapers/claudito-01.png ~/wallpapers || check_error "No se pudieron copiar los archivos de configuracion del WC de quickshell"
+    cp $REPOLOCAL/wallpapers/clipito-01.png ~/wallpapers || check_error "No se pudieron copiar los archivos de configuracion del WC de quickshell"
 
 
     fi
@@ -1434,7 +1434,7 @@ show_welcome() {
 
     # Mensaje (podés personalizarlo)
     local msg="\
-Script de Instalación \"Claudito Shell - Trixie\"
+Script de Instalación \"Clipito Shell - Trixie\"
 y Software para Debian GNU/Linux 13/Trixie - 64 Bits.
 
 youtube.com/@LinuxenCasa
@@ -1448,7 +1448,7 @@ Fecha: ${fecha}
 
 Este script de instalación:
   • Instala Wayland Compositors / Display Managers seleccionados.
-  • Aplica configuración de Claudito Shell y dotfiles de (Hyprland/Niri/Sway WM), si corresponde.
+  • Aplica configuración de Clipito Shell y dotfiles de (Hyprland/Niri/Sway WM), si corresponde.
   • Ofrece paquetes y extras opcionales (incluye Flatpak y Fuentes Nerd Fonts)
 
 Registro de instalación:  ${LOGFILE}

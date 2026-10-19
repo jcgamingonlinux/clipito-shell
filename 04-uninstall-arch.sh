@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ################################################
-# Script de DESINSTALACIÓN "Claudito Shell" - Arch Linux
+# Script de DESINSTALACIÓN "Clipito Shell" - Arch Linux
 #
 # Quita todo lo que instaló el script de instalación
 # (01-install-arch.sh):
@@ -132,7 +132,7 @@ FILES=(
     "/usr/local/bin/askpass-zenity"
     "/usr/local/bin/gparted-xwl"
     "/usr/local/share/applications/gparted-wayland.desktop"
-    "/usr/share/wallpapers/claudito-01.png"
+    "/usr/share/wallpapers/clipito-01.png"
     "/usr/share/wayland-sessions/sway.desktop"
     "/etc/sudoers.d/waylandenv"
     # nerd fonts "todas": workspace de compilación
@@ -140,7 +140,7 @@ FILES=(
     "/var/tmp/nerd-fonts-build"
     "/tmp/nerd-fonts-build"
     # clone del repo por defecto
-    "/tmp/claudito-shell"
+    "/tmp/clipito-shell"
 )
 
 # Contadores para el resumen
@@ -262,10 +262,10 @@ remove_files() {
         fi
     fi
 
-    # /tmp/claudito-shell: solo si es el clone del repo (tiene .git)
-    if [ -d "/tmp/claudito-shell/.git" ]; then
-        echo "  [rm] /tmp/claudito-shell"
-        run "sudo rm -rf '/tmp/claudito-shell'"
+    # /tmp/clipito-shell: solo si es el clone del repo (tiene .git)
+    if [ -d "/tmp/clipito-shell/.git" ]; then
+        echo "  [rm] /tmp/clipito-shell"
+        run "sudo rm -rf '/tmp/clipito-shell'"
         FILES_REMOVED=$(( FILES_REMOVED + 1 ))
     fi
 }
@@ -293,7 +293,7 @@ main() {
         msg+=$'\n'"2. Quita los paquetes (pacman -Rns + huérfanos)"
         msg+=$'\n'"3. Borra dotfiles, fuentes, /usr/local, estado, logs y backups"
         msg+=$'\n\n'"Cuando se borre el backup ya no se puede volver."
-        if ! dialog --title "Desinstalar Claudito Shell (Arch)" --yesno "$msg" 14 78; then
+        if ! dialog --title "Desinstalar Clipito Shell (Arch)" --yesno "$msg" 14 78; then
             echo "Desinstalación cancelada."
             exit 0
         fi
