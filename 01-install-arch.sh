@@ -140,10 +140,10 @@ fi
 MAQUINA_VIRTUAL="no"
 # WM_X11_INSTALADO="no"
 
-# Repositorios de GitLab
+# Repositorio
 #
-REPOGITLAB="${REPOGITLAB:-https://gitlab.com/linux-en-casa/claudito-shell.git}"
-# REPOGITLAB="git@gitlab.com:linux-en-casa/claudito-shell.git"
+REPOURL="${REPOURL:-https://github.com/jcgamingonlinux/clipito-shell.git}"
+# REPOURL="git@github.com:jcgamingonlinux/clipito-shell.git"
 REPOLOCAL="${REPOLOCAL:-/tmp/clipito-shell}"
 
 # Modo prueba local: si el script se ejecuta desde la raiz de un checkout de
@@ -753,7 +753,7 @@ Script de Instalación \"Clipito Shell - Arch\"
 y Software para Arch Linux y Derivadas - 64 Bits.
 
 youtube.com/@LinuxenCasa
-https://gitlab.com/linux-en-casa/claudito-shell
+https://github.com/jcgamingonlinux/clipito-shell
 Script by Gabriel Parri - gabeeOS Linux
 JC Gaming On Linux - fork, mejoras y testeo, asistido por JC IA
 
@@ -765,7 +765,7 @@ esté basada en Arch con systemd.
 
 
 Más detalles en el repositorio:
-https://gitlab.com/linux-en-casa/claudito-shell"
+https://github.com/jcgamingonlinux/clipito-shell"
 
 
 
@@ -841,7 +841,7 @@ install_selected() {
 
         cd /tmp
         # clonar explícitamente al destino esperado
-        git clone "$REPOGITLAB" "$REPOLOCAL" || { echo "Error: No se pudo clonar el repositorio de dotfiles."; exit 1; }
+        git clone "$REPOURL" "$REPOLOCAL" || { echo "Error: No se pudo clonar el repositorio de dotfiles."; exit 1; }
     fi
 
 
@@ -1308,7 +1308,7 @@ Script de Instalación \"Clipito Shell - Arch\"
 y Software para Arch Linux - 64 Bits y derivadas.
 
 youtube.com/@LinuxenCasa
-https://gitlab.com/linux-en-casa/claudito-shell
+https://github.com/jcgamingonlinux/clipito-shell
 Script by Gabriel Parri - gabeeOS Linux
 JC Gaming On Linux - fork, mejoras y testeo, asistido por JC IA
 

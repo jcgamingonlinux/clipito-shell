@@ -135,10 +135,10 @@ fi
 MAQUINA_VIRTUAL="no"
 # WM_X11_INSTALADO="no"
 
-# Repositorios de GitLab
+# Repositorio
 #
-REPOGITLAB="https://gitlab.com/linux-en-casa/claudito-shell.git"
-# REPOGITLAB="git@gitlab.com:linux-en-casa/claudito-shell.git"
+REPOURL="https://github.com/jcgamingonlinux/clipito-shell.git"
+# REPOURL="git@github.com:jcgamingonlinux/clipito-shell.git"
 REPOLOCAL="/tmp/clipito-shell"
 
 # Repositorio de Wallpapers
@@ -718,7 +718,7 @@ Script de Instalación \"Clipito Shell - Trixie\"
 y Software para Debian GNU/Linux 13/Trixie - 64 Bits.
 
 youtube.com/@LinuxenCasa
-https://gitlab.com/linux-en-casa/claudito-shell
+https://github.com/jcgamingonlinux/clipito-shell
 Script by Gabriel Parri - gabeeOS Linux.
 
 Agradecimientos a Johan David M. por la compilación de los
@@ -734,7 +734,7 @@ Instalar por lo menos la fuente JetBrains Mono Nerd Font
 que es la fuente que se usa por defecto en esta configuración.
 
 Más detalles en el repositorio:
-https://gitlab.com/linux-en-casa/claudito-shell"
+https://github.com/jcgamingonlinux/clipito-shell"
 
 
 
@@ -810,7 +810,7 @@ install_selected() {
 
     cd /tmp
     # clonar explícitamente al destino esperado
-    git clone "$REPOGITLAB" "$REPOLOCAL" || { echo "Error: No se pudo clonar el repositorio de dotfiles."; exit 1; }
+    git clone "$REPOURL" "$REPOLOCAL" || { echo "Error: No se pudo clonar el repositorio de dotfiles."; exit 1; }
 
 
 ################################################
@@ -1334,7 +1334,7 @@ Script de Instalación \"Clipito Shell - Trixie\"
 y Software para Debian GNU/Linux 13/Trixie - 64 Bits.
 
 youtube.com/@LinuxenCasa
-https://gitlab.com/linux-en-casa/claudito-shell
+https://github.com/jcgamingonlinux/clipito-shell
 Script by Gabriel Parri - gabeeOS Linux
 
 Sistema Operativo:  ${distro} ${ver}

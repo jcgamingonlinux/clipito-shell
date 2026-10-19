@@ -21,7 +21,7 @@
 #   Ejecutalo como usuario normal (usa sudo por debajo), no como root.
 #
 # youtube.com/@LinuxenCasa
-# https://gitlab.com/linux-en-casa/claudito-shell
+# https://github.com/jcgamingonlinux/clipito-shell
 # Script de instalación: Gabriel Parri - gabeeOS Linux
 # Script de desinstalación: JC Gaming On Linux, asistido por JC IA
 ################################################
