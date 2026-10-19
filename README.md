@@ -2,7 +2,7 @@
 
 **Un escritorio completo para tu compositor Wayland —barra, launcher, notificaciones, menú de energía, fondos de pantalla y más— con la misma experiencia en niri, Sway, Hyprland y mango.**
 
-![Clipito Shell](./imagenes/capibara-clipito.png)
+![Clipito Shell](./imagenes/clipito.png)
 
 Hecho con [Quickshell](https://quickshell.org) · 
 Software libre (GPLv3) · 
