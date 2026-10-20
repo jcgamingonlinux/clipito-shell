@@ -419,8 +419,15 @@ main() {
         [[ -d "$HOME/wallpapers" && -z "$(ls -A "$HOME/wallpapers" 2>/dev/null)" ]] \
             && echo "DRY: rmdir $HOME/wallpapers (quedaría vacío)"
     else
-        [[ -d "$HOME/wallpapers" && -z "$(ls -A "$HOME/wallpapers" 2>/dev/null)" ]] \
-            && { rmdir "$HOME/wallpapers" 2>/dev/null && echo "  [rmdir] $HOME/wallpapers (quedó vacío)"; }
+        if [[ -d "$HOME/wallpapers" && -z "$(ls -A "$HOME/wallpapers" 2>/dev/null)" ]]; then
+            # rmdir puede fallar por race (el dir deja de estar vacío en el
+            # último instante): no matar el script a mitad de desinstalación.
+            if rmdir "$HOME/wallpapers" 2>/dev/null; then
+                echo "  [rmdir] $HOME/wallpapers (quedó vacío)"
+            else
+                echo "  [aviso] ~/wallpapers no se pudo rmdir (quedó con contenido en el último instante)"
+            fi
+        fi
     fi
 
     # Los clones del repo (nombres legacy incluidos): solo si son clones .git

@@ -795,7 +795,14 @@ install_selected() {
     # desinstalación quitar solo lo que ESTE script agregó (y no paquetes
     # que ya vinieran de la distro, ej. CachyOS).
     PACMAN_BEFORE="$HOME/.wm-installer-packages-before"
-    pacman -Qq > "$PACMAN_BEFORE" 2>/dev/null || true
+    # Si pacman falla (p. ej. lock de DB), NO dejar un snapshot vacío/parcial:
+    # con antes=vacío el diff marcaría TODOS los paquetes del sistema como
+    # "nuevos" y la desinstalación intentaría quitar casi todo. Sin snapshot,
+    # el 04 usa la lista estática (más conservadora).
+    if ! pacman -Qq > "$PACMAN_BEFORE" 2>/dev/null; then
+        echo ">> [aviso] no se pudo registrar el snapshot de paquetes (pacman -Qq falló): la desinstalación usará la lista estática."
+        rm -f "$PACMAN_BEFORE"
+    fi
 
     sudo pacman -Syu curl --needed --noconfirm || check_error "No se pudo actualizar el sistema."
 
