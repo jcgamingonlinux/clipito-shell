@@ -113,6 +113,9 @@ PKGS=(
     dialog
 )
 
+# Registro de paquetes realmente instalados (lo crea el instalador nuevo)
+NEWPKGS_FILE="$HOME/.wm-installer-packages-new"
+
 ################################################
 # Archivos/directorios que el script crea o sobreescribe
 ################################################
@@ -125,22 +128,38 @@ FILES=(
     "$HOME/.config/kitty"
     "$HOME/.config/alacritty"
     "$HOME/.config/foot"
-    "$HOME/wallpapers"
+    # Solo los wallpapers del instalador; NO el directorio entero (puede
+    # contener wallpapers propios del usuario). El rmdir queda en main().
+    "$HOME/wallpapers/clipito-01.png"
+    "$HOME/wallpapers/claudito-01.png"   # nombre legacy (pre-rebrand)
+    "$HOME/wallpapers/claudeito-01.png"  # nombre legacy (pre-rebrand)
+    "$HOME/go"
+    "$HOME/.config/go"
     "$HOME/.wm-installer-state"
     "$HOME/install_log.txt"
     "$HOME/.config-backup"
+    "$HOME/.config/nwg-displays"
     "/usr/local/bin/askpass-zenity"
     "/usr/local/bin/gparted-xwl"
     "/usr/local/share/applications/gparted-wayland.desktop"
     "/usr/share/wallpapers/clipito-01.png"
+    "/usr/share/wallpapers/claudito-01.png"   # nombre legacy (pre-rebrand)
+    "/usr/share/wallpapers/claudeito-01.png"  # nombre legacy (pre-rebrand)
     "/usr/share/wayland-sessions/sway.desktop"
     "/etc/sudoers.d/waylandenv"
     # nerd fonts "todas": workspace de compilación
     "$HOME/.cache/nerd-fonts-build"
+    # cache de build de Go (se crea al compilar yay/ministream con `go`)
+    "$HOME/.cache/go-build"
     "/var/tmp/nerd-fonts-build"
     "/tmp/nerd-fonts-build"
-    # clone del repo por defecto
+    # registros de paquetes del instalador
+    "$HOME/.wm-installer-packages-new"
+    "$HOME/.wm-installer-packages-before"
+    # clone del repo por defecto (nombres legacy incluidos)
     "/tmp/clipito-shell"
+    "/tmp/claudito-shell"
+    "/tmp/claudeito-shell"
 )
 
 # Contadores para el resumen
@@ -161,6 +180,18 @@ find_oldest_manifest() {
     echo "$m"
 }
 
+# Paths restaurados desde el backup: ya contienen el estado original, así que
+# remove_files() NO debe borrarlos (son del usuario, no del instalador).
+RESTORED_PATHS=()
+
+is_restored() {
+    local r
+    for r in "${RESTORED_PATHS[@]:-}"; do
+        [[ "$r" == "$1" ]] && return 0
+    done
+    return 1
+}
+
 restore_backup() {
     local manifest="$1"
     local bdir
@@ -174,16 +205,15 @@ restore_backup() {
             echo "  [saltado] no está el respaldo de: $original"
             continue
         fi
-        local cp_cmd="cp -a"
-        local mk_cmd="mkdir -p"
-        [[ "$original" != "$HOME"* ]] && { cp_cmd="sudo cp -a"; mk_cmd="sudo mkdir -p"; }
+        local cp_cmd="cp -a" rm_cmd="rm -rf" mk_cmd="mkdir -p"
+        [[ "$original" != "$HOME"* ]] && { cp_cmd="sudo cp -a"; rm_cmd="sudo rm -rf"; mk_cmd="sudo mkdir -p"; }
+        # Borro el estado actual (puede contener archivos agregados por el
+        # instalador) y copio el backup: queda el estado EXACTO original.
+        run "$rm_cmd '$original'"
         run "$mk_cmd '$(dirname "$original")'"
-        if [[ -d "$entrada" ]]; then
-            run "$cp_cmd '$entrada/.' '$original/'"
-        else
-            run "$cp_cmd '$entrada' '$original'"
-        fi
+        run "$cp_cmd '$entrada' '$original'"
         echo "  [restaurado] $original"
+        RESTORED_PATHS+=("$original")
         FILES_RESTORED=$(( FILES_RESTORED + 1 ))
     done < "$manifest"
 }
@@ -192,6 +222,16 @@ restore_backup() {
 # 2) Paquetes flatpak (antes de quitar flatpak)
 ################################################
 remove_flatpak() {
+    # Solo si el propio paquete flatpak fue instalado por el script.
+    # Si flatpak es original del usuario, no tocamos sus apps ni remotos.
+    local p
+    for p in "${REMOVAL_LIST[@]:-}"; do
+        if [[ "$p" == "flatpak" ]]; then
+            break
+        fi
+        continue
+    done
+    [[ "$p" == "flatpak" ]] || return 0
     if ! command -v flatpak >/dev/null 2>&1; then
         return 0
     fi
@@ -203,32 +243,82 @@ remove_flatpak() {
 ################################################
 # 3) Quitar paquetes
 ################################################
-remove_packages() {
-    local to_remove=()
+# Construye la lista final de paquetes a quitar (REMOVAL_LIST):
+# la intersección de la lista de origen con lo que está instalado.
+build_removal_list() {
     local p
-    for p in "${PKGS[@]}"; do
+    REMOVAL_LIST=()
+
+    # Si el instalador registró los paquetes que realmente instaló, usar esa
+    # lista (quitar solo lo agregado, sin tocar lo original de la distro).
+    # Si no existe el registro (instalaciones con versión vieja del script),
+    # se usa la lista completa de paquetes posibles.
+    local source_pkgs=()
+    if [[ -f "$NEWPKGS_FILE" ]] && [[ -s "$NEWPKGS_FILE" ]]; then
+        echo ">> Usando el registro de paquetes instalados por el script ($NEWPKGS_FILE)."
+        local line
+        while IFS= read -r line; do
+            [[ -z "$line" || "$line" == \#* ]] && continue
+            source_pkgs+=("$line")
+        done < "$NEWPKGS_FILE"
+    else
+        echo ">> No hay registro de instalación: usando la lista completa de paquetes posibles."
+        source_pkgs=("${PKGS[@]}")
+    fi
+
+    for p in "${source_pkgs[@]}"; do
         if pacman -Qi "$p" >/dev/null 2>&1; then
-            to_remove+=("$p")
+            REMOVAL_LIST+=("$p")
         fi
     done
 
-    if [[ ${#to_remove[@]} -eq 0 ]]; then
+    if [[ ${#REMOVAL_LIST[@]} -eq 0 ]]; then
         echo ">> No hay paquetes del script instalados."
+    fi
+}
+
+remove_packages() {
+    if [[ ${#REMOVAL_LIST[@]} -eq 0 ]]; then
         return 0
     fi
 
-    echo ">> Quitando ${#to_remove[@]} paquetes..."
+    # Snapshot de huérfanos ANTES de quitar: los huérfanos preexistentes son
+    # del usuario (paquetes que él instaló y nada depende de ellos) y NO se tocan.
+    local orphans_before
+    orphans_before="$(pacman -Qdtq 2>/dev/null | grep -v '^base$' | sort || true)"
+
+    echo ">> Quitando ${#REMOVAL_LIST[@]} paquetes..."
     if [ "$DRY_RUN" -eq 1 ]; then
-        printf 'DRY: sudo pacman -Rns --noconfirm %s\n' "${to_remove[*]}"
+        # Dry run real: pacman muestra la transacción completa (y avisa si
+        # algún paquete es requerido por algo preexistente). Ojo: -p no se
+        # puede combinar con -n/-s, así que solo se usa -R -p.
+        sudo pacman -Rp --noconfirm "${REMOVAL_LIST[@]}" \
+            || echo "  [aviso] dry-run de pacman reportó problemas (ver arriba)."
+        echo "DRY: (sin ejecutar)"
     else
-        sudo pacman -Rns --noconfirm "${to_remove[@]}" \
+        sudo pacman -Rns --noconfirm "${REMOVAL_LIST[@]}" \
             || echo "  [aviso] hubo errores al quitar algunos paquetes (ver arriba)."
     fi
-    PKGS_REMOVED=${#to_remove[@]}
+    PKGS_REMOVED=${#REMOVAL_LIST[@]}
 
-    echo ">> Quitando paquetes huérfanos..."
-    run "sudo pacman -Qdtq | grep -v '^base$' | xargs -r sudo pacman -Rns --noconfirm" \
-        || echo "  [aviso] no se pudo completar la limpieza de huérfanos."
+    if [ "$DRY_RUN" -eq 1 ]; then
+        echo "DRY: limpieza de huérfanos creada por esta desinstalación (diff antes/después)"
+        return 0
+    fi
+
+    echo ">> Quitando solo los huérfanos creados por esta desinstalación..."
+    local orphans_after new_orphans p
+    orphans_after="$(pacman -Qdtq 2>/dev/null | grep -v '^base$' | sort || true)"
+    new_orphans="$(comm -13 <(printf '%s\n' "$orphans_before") <(printf '%s\n' "$orphans_after"))"
+    if [[ -n "${new_orphans//[[:space:]]/}" ]]; then
+        while IFS= read -r p; do
+            [[ -z "$p" ]] && continue
+            echo "  [huérfano nuevo] $p"
+            sudo pacman -Rns --noconfirm "$p" || echo "  [aviso] no se pudo quitar $p."
+        done <<< "$new_orphans"
+    else
+        echo ">> No se crearon huérfanos nuevos."
+    fi
 }
 
 ################################################
@@ -238,9 +328,25 @@ remove_files() {
     local f
     local removed=0
     for f in "${FILES[@]}"; do
-        if [[ -e "$f" || -L "$f" ]]; then
-            local rm_cmd="rm -rf"
-            [[ "$f" != "$HOME"* ]] && rm_cmd="sudo rm -rf"
+        # Si este path se restauró desde el backup, ya tiene el contenido
+        # original del usuario: no se borra.
+        if is_restored "$f"; then
+            echo "  [conservado] $f (restaurado del backup, es original)"
+            continue
+        fi
+        local rm_cmd="rm -rf"
+        local sys=0
+        [[ "$f" != "$HOME"* ]] && { rm_cmd="sudo rm -rf"; sys=1; }
+        # Paths de sistema: [[ -e ]] como usuario falla si el directorio no es
+        # legible (ej. /etc/sudoers.d es drwxr-x--- root), así que se verifica
+        # con sudo para no dejar archivos atrás (p. ej. waylandenv).
+        local found=0
+        if [[ "$sys" -eq 1 ]]; then
+            sudo test -e "$f" 2>/dev/null && found=1
+        else
+            [[ -e "$f" || -L "$f" ]] && found=1
+        fi
+        if [[ "$found" -eq 1 ]]; then
             echo "  [rm] $f"
             run "$rm_cmd '$f'"
             removed=$(( removed + 1 ))
@@ -262,12 +368,7 @@ remove_files() {
         fi
     fi
 
-    # /tmp/clipito-shell: solo si es el clone del repo (tiene .git)
-    if [ -d "/tmp/clipito-shell/.git" ]; then
-        echo "  [rm] /tmp/clipito-shell"
-        run "sudo rm -rf '/tmp/clipito-shell'"
-        FILES_REMOVED=$(( FILES_REMOVED + 1 ))
-    fi
+    # Los clones del repo se manejan en main() (nombres legacy incluidos).
 }
 
 ################################################
@@ -287,10 +388,14 @@ main() {
     local will_restore="no"
     [[ -n "$manifest" ]] && will_restore="sí"
 
+    # Primero armo la lista de paquetes a quitar (la usan el diálogo, el
+    # flatpak y la remoción).
+    build_removal_list
+
     if [ "$FORCE" -eq 0 ]; then
         local msg="Va a desinstalar TODO lo que instaló el script de instalación:"
         msg+=$'\n\n'"1. Restaura los archivos que existían antes de la instalación: $will_restore"
-        msg+=$'\n'"2. Quita los paquetes (pacman -Rns + huérfanos)"
+        msg+=$'\n'"2. Quita ${#REMOVAL_LIST[@]} paquetes (pacman -Rns + huérfanos nuevos)"
         msg+=$'\n'"3. Borra dotfiles, fuentes, /usr/local, estado, logs y backups"
         msg+=$'\n\n'"Cuando se borre el backup ya no se puede volver."
         if ! dialog --title "Desinstalar Clipito Shell (Arch)" --yesno "$msg" 14 78; then
@@ -308,6 +413,25 @@ main() {
     remove_flatpak
     remove_packages
     remove_files
+
+    # Si ~/wallpapers quedó vacío (solo tenía wallpapers del script), lo borra.
+    if [ "$DRY_RUN" -eq 1 ]; then
+        [[ -d "$HOME/wallpapers" && -z "$(ls -A "$HOME/wallpapers" 2>/dev/null)" ]] \
+            && echo "DRY: rmdir $HOME/wallpapers (quedaría vacío)"
+    else
+        [[ -d "$HOME/wallpapers" && -z "$(ls -A "$HOME/wallpapers" 2>/dev/null)" ]] \
+            && { rmdir "$HOME/wallpapers" 2>/dev/null && echo "  [rmdir] $HOME/wallpapers (quedó vacío)"; }
+    fi
+
+    # Los clones del repo (nombres legacy incluidos): solo si son clones .git
+    local clone
+    for clone in /tmp/clipito-shell /tmp/claudito-shell /tmp/claudeito-shell; do
+        if [[ -d "$clone/.git" ]]; then
+            echo "  [rm] $clone"
+            run "sudo rm -rf '$clone'"
+            FILES_REMOVED=$(( FILES_REMOVED + 1 ))
+        fi
+    done
 
     local summary="Desinstalación completada:"
     summary+=$'\n\n'"Archivos restaurados: $FILES_RESTORED"

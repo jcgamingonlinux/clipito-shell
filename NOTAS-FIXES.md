@@ -226,3 +226,70 @@ Publicado como fork: `https://github.com/jcgamingonlinux/clipito-shell` (main).
    `master` (sin version fija; hoy era 0.18.0, la config del repo
    está probada contra 0.14.4, la misma del `.deb` de trixie).
    El tag `0.14.4` existe (verificado en GitHub API).
+
+## Desinstalación (04-uninstall-arch.sh) — PROBADO EN MÁQUINA REAL (2026-10-19/20)
+
+- **Máquina:** `jc-minipc` (Minisforum, Ryzen H 255), **distribución actual: CachyOS**
+  (la que corre hoy en la mini PC), usuario `jcia`.
+- **Escenario:** instalación completa del repo (hyprland + quickshell + kitty, 14–15
+  oct) sobre una base LXQt (sddm, breeze). Desinstalar para volver al estado
+  original sin tocar nada preexistente.
+- **Resultado:** **éxito**. 66 paquetes quitados, 14 archivos/directorios borrados,
+  `~/.config/gtk-3.0` restaurado al estado exacto original, 0 huérfanos nuevos,
+  `sddm` intacto como DM.
+
+### Lista exacta de paquetes (lo central del test)
+- `/var/log/pacman.log` distinguía `[ALPM] installed` (70 paquetes que el
+  instalador **agregó de verdad**) de `[ALPM] upgraded` (preexistentes solo
+  actualizados: `vim`, `fastfetch`, `imagemagick`, `discord`, `telegram-desktop`,
+  stack KDE, `python-pydantic`, …) → de esos últimos **no se tocó ninguno**.
+- Análisis de `Required By`: 4 de los 70 hoy los piden paquetes preexistentes →
+  conservados (`graphicsmagick`→`zbar`, `libadwaita`→`gnome-firmware`,
+  `python-anyio`→`python-httpx2`, `ministream`→`libadwaita`). Lista final: **66**.
+- Dry-run con `pacman -Rp` real: la primera pasada detectó el conflicto
+  `ministream`/`libadwaita`; la segunda quedó limpia antes de ejecutar.
+
+### Verificado tras el run
+- **Fuera:** hyprland, quickshell, kitty, yay, thunar, dialog, acpi, swaylock,
+  wlr-randr, yad, zenity, xorg-xwayland, nwg-displays, hyprland-guiutils
+  (verificado con `pacman -Qi`).
+- **Intactos (preexistentes):** xorg-server, sddm, vim, fastfetch, firefox,
+  gparted, micro, mpv, btop, alsa-utils, pavucontrol, network-manager-applet,
+  breeze, breeze-gtk, imagemagick, adwaita-icon-theme, graphicsmagick, libadwaita,
+  python-anyio, zbar, gnome-firmware, python-httpx2, flatpak.
+- `~/wallpapers/wallhaven/` (wallpaper del usuario) conservado; `/usr/local/bin`
+  quedó como el original; gtk-3.0 restaurado del backup de la primera instalación
+  (mtime original del 15 sep intacto).
+
+### 14. [FUNCIONAL] 04 — lista de remoción estática poco fiable
+- **Problema:** la lista hardcodeada mezclaba paquetes que el instalador no
+  instaló (deps KDE de la base) y paquetes que sí instaló pero que el usuario
+  ya usa en otra cosa → rompía la transacción de `pacman -Rns` o quitaba
+  paquetes ajenos.
+- **Fix:** `build_removal_list()` lee `~/.wm-installer-packages-new` (snapshot
+  antes/después que registra el instalador) y solo usa la lista estática en
+  instalaciones legacy. Los huérfanos se limpian por **diff antes/después**
+  (no se tocan huérfanos preexistentes del usuario).
+- **Fixes asociados del mismo run:** `restore_backup()` restaura EXACTO
+  (`rm` + `cp -a`, no merge) y los paths restaurados nunca se borran
+  (`RESTORED_PATHS`/`is_restored`); `remove_flatpak()` solo actúa si flatpak fue
+  instalado por el script; `~/wallpapers` se limpia por archivo (no el directorio
+  entero); dry-run con `pacman -Rp` real que anticipa conflictos; nombres legacy
+  `claudito`/`claudeito` en clones y wallpapers; guard de `whoami` (no root).
+
+### 15. [FUNCIONAL] 04 — paths de sistema no visibles como usuario quedaban atrás (hallado en el test real)
+- **Problema:** `/etc/sudoers.d` es `drwxr-x--- root:root`: el chequeo de
+  existencia `[[ -e $f ]]` corriendo como usuario devuelve falso (EACCES en el
+  stat) aunque el archivo exista, y el `sudo rm` nunca se ejecuta →
+  `/etc/sudoers.d/waylandenv` quedó detrás de la desinstalación real.
+- **Fix:** `remove_files()` detecta la existencia de paths de sistema (fuera de
+  `$HOME`) con `sudo test -e`; los paths de usuario mantienen el chequeo normal.
+- **Verificado:** en el test el archivo quedó; con el fix el chequeo sí lo ve
+  (el resto manual se limpió a mano en la máquina).
+
+### 16. [MENOR] 04 — `~/.cache/go-build` no estaba en la lista (hallado en el test real)
+- **Problema:** al compilar `yay` (AUR helper escrito en Go) se crea
+  `~/.cache/go-build`; no estaba en el array `FILES` y quedó detrás.
+- **Fix:** agregado `"$HOME/.cache/go-build"` a `FILES`.
+- **Verificado:** resto manual limpiado a mano en la máquina; en runs futuros
+  queda cubierto.

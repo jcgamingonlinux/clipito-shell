@@ -790,6 +790,13 @@ install_selected() {
     exec > >(tee -i "$LOGFILE") 2>&1
     echo ">> Iniciando instalación..."
     check_internet
+
+    # Registro del estado de paquetes ANTES de instalar: permite a la
+    # desinstalación quitar solo lo que ESTE script agregó (y no paquetes
+    # que ya vinieran de la distro, ej. CachyOS).
+    PACMAN_BEFORE="$HOME/.wm-installer-packages-before"
+    pacman -Qq > "$PACMAN_BEFORE" 2>/dev/null || true
+
     sudo pacman -Syu curl --needed --noconfirm || check_error "No se pudo actualizar el sistema."
 
 
@@ -1285,6 +1292,17 @@ install_selected() {
             esac
         fi
     done
+
+    # Registro de los paquetes NUEVOS que instaló este script (diff antes/después).
+    # Si el instalador se reejecutaba, se une con el registro anterior.
+    NEWPKGS="$HOME/.wm-installer-packages-new"
+    if [ -f "$PACMAN_BEFORE" ]; then
+        diff <(sort "$PACMAN_BEFORE") <(sort <(pacman -Qq)) | awk '/^>/{print $2}' >> "$NEWPKGS" 2>/dev/null || true
+        if [ -f "$NEWPKGS" ]; then
+            sort -u "$NEWPKGS" -o "$NEWPKGS"
+            echo ">> Paquetes instalados por este script: $(wc -l < "$NEWPKGS") (registro: $NEWPKGS)"
+        fi
+    fi
 
     dialog --title "Instalación" --msgbox "Instalación completada. Por favor, cierra sesión o reinicia para aplicar los cambios. Selecciona tu WM/DM en el gestor de inicio de sesión. Consulta $LOGFILE para detalles." 10 60 || true
     exec > /dev/tty 2>&1

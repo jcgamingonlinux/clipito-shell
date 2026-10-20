@@ -661,7 +661,7 @@ comparten casi todo el código y el diseño, adaptadas cada una a su compositor 
 `~/.config/quickshell/` y funciona sola.
 
 El desarrollo de este Escritorio se hizo en su mayoría usando la IA de Claude Code y se fueron
-mostrando los avances y ajustes en los directos del canal de YouTube en Septiembre de 2026.
+mostrando los avances y ajustes en los directos del canal linux en casa.
 
 Esta versión es el **fork mantenido por JC Gaming On Linux**: incluye los fixes y
 mejoras documentados en [NOTAS-FIXES.md](./NOTAS-FIXES.md) sobre el repo original
