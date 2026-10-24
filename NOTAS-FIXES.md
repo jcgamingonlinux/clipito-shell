@@ -315,12 +315,17 @@ Publicado como fork: `https://github.com/jcgamingonlinux/clipito-shell` (main).
 - **Verificado (gateway, 2026-10-24):** zig 0.17.0 + ly v1.5.0 → `zig build`
   rc=0, binario en `zig-out/bin/ly` (29 MB); con zig 0.16.0 el mismo build da
   rc=2 con los errores citados.
-- **Test forky (box 192.168.1.5, 2026-10-23):** el fix funcionó (zig 0.17.0
-  descargado, ly pinneada a `bccddcda`) pero `zig build` falló con
-  `unable to unpack git files: ReadFailed` en la dep `translate-c` (codeberg):
-  caida transitoria de red que deja el cache de zig (~/.cache/zig) parcialmente
-  poblado — reintentar sin limpiar el cache falla igual. Retry manual con cache
-  limpia → rc=0, binario de 27 MB en ~2 min.
+- **Test forky (box 192.168.1.5, 2026-10-23): PROBADO EN MÁQUINA REAL, OK.**
+  Primera corrida: el fix funcionó (zig 0.17.0 descargado, ly pinneada a
+  `bccddcda`) pero `zig build` falló con `unable to unpack git files:
+  ReadFailed` en la dep `translate-c` (codeberg): caida transitoria de red que
+  deja el cache de zig (~/.cache/zig) parcialmente poblado — reintentar sin
+  limpiar el cache falla igual. Retry manual con cache limpia → rc=0, binario
+  de 27 MB en ~2 min. Corrida completa (post-uninstall + reclone desde GitHub
+  + reinstalación): niri 26.04 + ly 1.5.0 instalados, `ly@tty2.service`
+  enabled, 0 errores en el log. El build de ly duró ~28 s gracias al cache de
+  compilación tibio (deps + artefactos del retry manual sobrevivieron al
+  reboot en /home).
 - **Fix 2 (retry, 02 y 03):** `zig build` ahora corre hasta 3 intentos; a cada
   fallo limpia `~/.cache/zig` y reintenta; si los 3 fallan, mensaje claro y
   `exit 1`. Esto convierte el flake de red en un auto-recovery en vez de un
