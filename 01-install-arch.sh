@@ -190,7 +190,7 @@ BACKUPDIR="$HOME/.config-backup/$DATE"
         xdg-user-dirs
         xfce4-screenshooter
         xorg-server
-        xterm
+        yazi
         pipewire
         pipewire-alsa
         pipewire-pulse

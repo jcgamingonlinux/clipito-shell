@@ -186,7 +186,6 @@ BACKUPDIR="$HOME/.config-backup/$DATE"
         gvfs-fuse
         mtp-tools
         pavucontrol
-        pcmanfm
         playerctl
         pulseaudio-utils
         synaptic
@@ -194,7 +193,6 @@ BACKUPDIR="$HOME/.config-backup/$DATE"
         xdg-user-dirs
         xfce4-screenshooter
         xorg
-        xterm
         pipewire
         pipewire-alsa
         pipewire-pulse
@@ -206,11 +204,9 @@ BACKUPDIR="$HOME/.config-backup/$DATE"
     ###  así le diga que no instale los recomendados
     ###  network-manager-applet
 
-    # thunar también instala cinnamon
-    # aunque si le digo que no intale los recomendados
-    # entonces solo instala lo mínimo
-    # solo que no se como funcionaría. Instalo pcmanfm.
-    #    thunar
+    # File manager: thunar (en pkgs_wm_wayland). Verificado en forky
+    # (2026-10-24): no arrastra cinnamon. pcmanfm quedó descartado
+    # (duplicaba con thunar en el menú y ningún WM lo usaba).
 #################################################
     # Paquetes exclusivos del nivel intermedio (se suman a pkgs_base)
     pkgs_extra_intermedio=(
@@ -318,7 +314,6 @@ pkgs_mango_niri=(
     libliftoff-dev
     hwdata
     seatd
-    pcmanfm
     pango1.0-tools
     xwayland
     meson
@@ -848,8 +843,6 @@ install_selected() {
 
 
     ############################################
-    sudo apt install -y pcmanfm
-    #############################################
     # Ahora instalo el pack de software.
 
     # Instalar paquetes de software según selección

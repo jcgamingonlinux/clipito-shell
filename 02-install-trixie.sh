@@ -195,7 +195,6 @@ BACKUPDIR="$HOME/.config-backup/$DATE"
         xdg-user-dirs
         xfce4-screenshooter
         xorg
-        xterm
     )
 
     pkgs_base_backports=(
