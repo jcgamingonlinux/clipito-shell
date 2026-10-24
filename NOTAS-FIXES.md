@@ -442,3 +442,17 @@ el instalador no bastaba.
 **Fix:** la fase de DM ahora hace `systemctl mask` de gdm/gdm3/lightdm/sddm
 (no-elegidos) y `unmask` del elegido (01/02/03). En la box ya quedó aplicado
 a mano: gdm+gdm3 masked, ly@tty2 es el único DM.
+
+## Nota — nautilus (GNOME Files) redundante con thunar (2026-10-24)
+
+La box (imagen GenMachines con GNOME de base) traía **nautilus 51** además de
+thunar: dos "gestores de archivos" en el menú de apps. Nautilus era auto
+(traído por el stack GNOME de la imagen: gnome-sushi, gnome-flashback,
+xdg-desktop-portal-gnome, papers) — NINGÚN paquete de los instaladores lo
+arrastra (verificado con `apt-cache showpkg nautilus` → reverse-deps son solo
+paquetes GNOME), así que en una instalación limpia no aparece.
+Fix en la box: `apt-get remove nautilus` (sacó nautilus + gnome-sushi +
+gnome-flashback + xdg-desktop-portal-gnome, todos del stack de la imagen).
+Thunar queda como único file manager. El icono del menú se refresca
+reiniciando `qs` (el bar cachea la lista de .desktop al arrancar) o con el
+próximo login. Si alguna vez se arma la bench desde imagen GNOME, repetir.
