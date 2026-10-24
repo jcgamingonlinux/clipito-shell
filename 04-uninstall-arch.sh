@@ -95,7 +95,7 @@ PKGS=(
     # --- WM (comunes) ---
     adwaita-icon-theme breeze breeze-gtk noto-fonts-emoji git imagemagick
     ttf-jetbrains-mono-nerd libnotify kvantum sound-theme-freedesktop swaylock
-    wlr-randr yad zenity nwg-displays quickshell
+    wlr-randr yad zenity quickshell
     # --- hyprland ---
     hyprland hyprland-guiutils kitty xorg-xwayland xdg-desktop-portal-hyprland
     xdg-desktop-portal-gtk
@@ -138,7 +138,6 @@ FILES=(
     "$HOME/.wm-installer-state"
     "$HOME/install_log.txt"
     "$HOME/.config-backup"
-    "$HOME/.config/nwg-displays"
     "/usr/local/bin/askpass-zenity"
     "/usr/local/bin/gparted-xwl"
     "/usr/local/share/applications/gparted-wayland.desktop"

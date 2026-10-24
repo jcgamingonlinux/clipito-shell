@@ -299,7 +299,6 @@ BACKUPDIR="$HOME/.config-backup/$DATE"
         xwayland
         yad
        	zenity
-       	nwg-displays
        	pipewire
 	    pipewire-alsa
 	    pipewire-pulse

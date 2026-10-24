@@ -346,3 +346,15 @@ Publicado como fork: `https://github.com/jcgamingonlinux/clipito-shell` (main).
   borrar las units.
 - **Verificado:** `bash -n` OK; se confirmará con un uninstall real en la box
   forky tras el test del instalador.
+
+## Fix 19 — nwg-displays sin soporte para niri (2026-10-23)
+
+**Síntoma:** el ítem "Displays Settings" del menú (quickshell niri-bar) no
+abría nada al clickear.
+**Causa:** `nwg-displays` (0.3.28) solo soporta sway y Hyprland; en niri
+termina con `[Error] Neither sway nor Hyprland detected, terminating` y no
+muestra GUI. Niri no tiene panel gráfico de displays (lo oficial es
+`niri-output` por terminal o keybinds).
+**Fix:** se quitó `nwg-displays` de las listas de instalación (01/02/03) y
+de desinstalación (04/05/06). En la box genmachine-test se removió con
+`apt-get remove -y nwg-displays`.
