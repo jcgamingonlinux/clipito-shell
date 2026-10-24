@@ -387,3 +387,36 @@ el arreglo lo comparten los caminos mango y niri.
   mango 0.17.5 (xcb, xcb-icccm, xcb-randr, libinput, wayland-client,
   libpcre2-8, libcjson, pangocairo) ya estaban OK; el único faltante era el
   compilador. `scenefx-0.5` queda FALTA hasta que se compila scenefx (esperado).
+
+## Fix 21 — network-manager-applet arrastra cinnamon + lightdm (2026-10-24)
+
+**Síntoma:** box forky (genmachine-test) con los 4 WMs instalados: el boot
+mostraba el greeter de lightdm (slick) en vez de ly@tty2, y el sistema tenía
+todo el escritorio Cinnamon (16+ paquetes) instalado.
+**Causa:** `network-manager-applet` (en la lista base de 01/02/03) depende de
+`policykit-1-gnome | polkit-1-auth-agent` (alternativa de paquete virtual). En
+forky `policykit-1-gnome` NO existe y el único proveedor de
+`polkit-1-auth-agent` es **cinnamon** → apt lo arrastra completo y lightdm se
+auto-activa (roba el default a ly). Verificado con `aptitude why`:
+`network-manager-applet Depende policykit-1-gnome | polkit-1-auth-agent` /
+`cinnamon Proporciona polkit-1-auth-agent`. Era un Depends:
+`--no-install-recommends` no lo evitaba.
+**Fix:** `network-manager-applet` fuera de las listas de 01/02/03 (se queda
+solo en 04/05/06 para limpiar instalaciones viejas). En los WMs de clipito no
+hay tray host que lo muestre; la red se maneja con nmtui. El applet sigue
+usándose en los autostart de mango/hypr (`nm-applet >/dev/null 2>&1 &`), que
+es un no-op inofensivo si no está instalado.
+**Bonus:** conflicto de binds en los configs de mango (warning al arrancar):
+`XF86AudioPlay` y `XF86AudioPause` suelen ser el mismo keycode → línea
+XF86AudioPause comentada en `.config/{arch,debian}-dotfiles/mango/config.conf`.
+
+## Nota — mango "no inicia": no era el compositor (2026-10-24)
+
+Prueba en la box: `runuser -u test -- mango` desde una TTY real (con ACL de
+logind sobre /dev/dri) → mango corre y el bar de quickshell arranca (se ve el
+JSON de workspaces en el log). El fallo que se veía
+(`failed to open /dev/dri/renderD128: Permission denied` → `couldn't create
+renderer`) ocurre al probar mango SIN sesión de seat (SSH o desde el greeter
+X de lightdm): el nodo render es `root:render 660` y la ACL la pone logind
+solo para el usuario de la sesión activa. Desde ly@tty2 (sesión real) mango
+inicia bien.
