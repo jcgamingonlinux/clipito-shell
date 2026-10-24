@@ -1244,13 +1244,21 @@ install_selected() {
                     sudo apt install -y build-essential libpam0g-dev libxcb-xkb-dev xauth \
 			                xserver-xorg brightnessctl git wget
                     cd /tmp
-                    wget https://ziglang.org/download/0.16.0/zig-x86_64-linux-0.16.0.tar.xz
-
-                    sudo tar -xvf zig-x86_64-linux-0.16.0.tar.xz -C /opt
-                    git clone https://codeberg.org/fairyglade/ly.git
+                    # ly (fairyglade) requiere zig 0.17.x: el gate
+                    # minimum_zig_version=0.17.0 en build.zig.zon (v1.5.0 y master)
+                    # hace fallar `zig build` con zig 0.16.0 (fix 2026-10-24).
+                    wget "https://ziglang.org/download/0.17.0/zig-x86_64-linux-0.17.0.tar.xz" \
+                        || check_error "No se pudo descargar zig 0.17.0."
+                    sudo rm -rf "/opt/zig-x86_64-linux-0.17.0"
+                    sudo tar -xvf zig-x86_64-linux-0.17.0.tar.xz -C /opt
+                    # tag v1.5.0: última versión liberada (master es 1.6.0 sin liberar)
+                    git clone --depth 1 --branch v1.5.0 https://codeberg.org/fairyglade/ly.git \
+                        || check_error "No se pudo clonar ly (v1.5.0)."
                     cd /tmp/ly/
-                    /opt/zig-x86_64-linux-0.16.0/zig build
-                    sudo /opt/zig-x86_64-linux-0.16.0/zig build installexe
+                    /opt/zig-x86_64-linux-0.17.0/zig build \
+                        || check_error "Fallo al compilar ly (zig build)."
+                    sudo /opt/zig-x86_64-linux-0.17.0/zig build installexe \
+                        || check_error "Fallo al instalar ly (zig build installexe)."
                     sudo systemctl enable --force ly@tty2.service
 		    ;;
 

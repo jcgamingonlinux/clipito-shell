@@ -163,10 +163,17 @@ FILES=(
     "/tmp/mango"
     "/tmp/scenefx"
     # ly (compilado con zig)
-    "/opt/zig-x86_64-linux-0.16.0"
+    "/opt/zig-x86_64-linux-0.16.0"   # instaladores viejos
+    "/opt/zig-x86_64-linux-0.17.0"   # instaladores desde 2026-10-24
     "/tmp/ly"
-    "/usr/local/bin/ly"
-    "/usr/local/lib/systemd/system/ly@.service"
+    "/usr/local/bin/ly"              # prefix /usr/local (antiguo)
+    "/usr/bin/ly"                    # prefix /usr (installexe por defecto)
+    "/usr/local/lib/systemd/system/ly@.service"   # antiguo
+    "/usr/lib/systemd/system/ly@.service"
+    "/usr/lib/systemd/system/ly-kmsconvt@.service"
+    "/etc/ly"                        # config + custom-sessions + lang
+    "/etc/pam.d/ly"
+    "/etc/pam.d/ly-autologin"
     # nerd fonts "todas": workspace de compilación
     "$HOME/.cache/nerd-fonts-build"
     "/var/tmp/nerd-fonts-build"
@@ -382,6 +389,10 @@ main() {
         echo ">> No hay backup en ~/.config-backup (nada que restaurar)."
     fi
 
+    # Deshabilita el servicio ly@tty2 ANTES de borrar la unit (el instalador lo habilita)
+    if command -v systemctl >/dev/null 2>&1; then
+        run "sudo systemctl disable ly@tty2.service 2>/dev/null || true"
+    fi
     remove_flatpak
     remove_packages
     remove_backports

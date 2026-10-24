@@ -293,3 +293,42 @@ Publicado como fork: `https://github.com/jcgamingonlinux/clipito-shell` (main).
 - **Fix:** agregado `"$HOME/.cache/go-build"` a `FILES`.
 - **Verificado:** resto manual limpiado a mano en la máquina; en runs futuros
   queda cubierto.
+
+### 17. [BLOQUEANTE] 02/03 — `ly` no compila: zig 0.16.0 no cumple el mínimo 0.17.0 (test forky)
+- **Problema:** el bloque `ly` (02-trixie y 03-forky) descargaba
+  `zig 0.16.0` y hacía `git clone` de `master` de `codeberg.org/fairyglade/ly`
+  (sin pin de versión). `ly` (v1.5.0 y master 1.6.0) requiere
+  **zig 0.17.x** (`minimum_zig_version = "0.17.0"` en `build.zig.zon`), así que
+  `zig build` falla con errores de compilación del propio build runner
+  (`invalid builtin function: '@backingInt'`, `no field named 'root' in struct
+  'Build'`) y el instalador muere ahí (set -e): "no termina de instalar".
+  Además, clonar `master` sin pin hace el build no reproducible: cualquier
+  bump de versión en el upstream rompe el instalador.
+- **Fix (02 y 03):**
+  1. zig **0.16.0 → 0.17.0** (único release 0.17.x disponible).
+  2. `git clone --depth 1 --branch v1.5.0` (última versión liberada de ly;
+     determinista).
+  3. `check_error` en `wget`, `git clone`, `zig build` y `zig build installexe`
+     (antes un fallo ahí dejaba el set -e sin mensaje).
+  4. `sudo rm -rf /opt/zig-x86_64-linux-0.17.0` antes del `tar` (evita mezclar
+     un extracto anterior parcial).
+- **Verificado (gateway, 2026-10-24):** zig 0.17.0 + ly v1.5.0 → `zig build`
+  rc=0, binario en `zig-out/bin/ly` (29 MB); con zig 0.16.0 el mismo build da
+  rc=2 con los errores citados. Pendiente: re-run del instalador en la box
+  forky (192.168.1.14) — la máquina estaba reinstalando forky base.
+
+### 18. [MENOR] 05/06 — uninstallers: paths de `ly` errados/incompletos y servicio no deshabilitado
+- **Problema:** `installexe` de `ly` (prefix por defecto `/usr`) instala
+  `/usr/bin/ly`, `/usr/lib/systemd/system/ly@.service` y
+  `ly-kmsconvt@.service`, `/etc/ly/` (config+lang), `/etc/pam.d/ly` y
+  `ly-autologin`. Los uninstallers apuntaban a `/usr/local/bin/ly` y
+  `/usr/local/lib/systemd/system/ly@.service` (prefix `/usr/local`, que el
+  instalador nunca usa) → el uninstall dejaba el ejecutable, las units, el
+  config y el pam detrás; el `systemctl enable --force ly@tty2` del instalador
+  tampoco se deshacía.
+- **Fix (05 y 06):** lista `FILES` corregida/aumentada (ambos prefixes zig
+  0.16/0.17, ambos prefixes de binario/unit, `ly-kmsconvt@.service`,
+  `/etc/ly`, `/etc/pam.d/ly*`) + `systemctl disable ly@tty2.service` antes de
+  borrar las units.
+- **Verificado:** `bash -n` OK; se confirmará con un uninstall real en la box
+  forky tras el test del instalador.
