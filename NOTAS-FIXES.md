@@ -229,8 +229,8 @@ Publicado como fork: `https://github.com/jcgamingonlinux/clipito-shell` (main).
 
 ## Desinstalación (04-uninstall-arch.sh) — PROBADO EN MÁQUINA REAL (2026-10-19/20)
 
-- **Máquina:** `jc-minipc` (Minisforum, Ryzen H 255), **distribución actual: CachyOS**
-  (la que corre hoy en la mini PC), usuario `jcia`.
+- **Máquina:** mini PC Minisforum (Ryzen H 255), **distribución actual: CachyOS**
+  (la que corre en la mini PC de pruebas).
 - **Escenario:** instalación completa del repo (hyprland + quickshell + kitty, 14–15
   oct) sobre una base LXQt (sddm, breeze). Desinstalar para volver al estado
   original sin tocar nada preexistente.
@@ -312,10 +312,10 @@ Publicado como fork: `https://github.com/jcgamingonlinux/clipito-shell` (main).
      (antes un fallo ahí dejaba el set -e sin mensaje).
   4. `sudo rm -rf /opt/zig-x86_64-linux-0.17.0` antes del `tar` (evita mezclar
      un extracto anterior parcial).
-- **Verificado (gateway, 2026-10-24):** zig 0.17.0 + ly v1.5.0 → `zig build`
+- **Verificado (server de desarrollo, 2026-10-24):** zig 0.17.0 + ly v1.5.0 → `zig build`
   rc=0, binario en `zig-out/bin/ly` (29 MB); con zig 0.16.0 el mismo build da
   rc=2 con los errores citados.
-- **Test forky (box 192.168.1.5, 2026-10-23): PROBADO EN MÁQUINA REAL, OK.**
+- **Test forky (box de pruebas, 2026-10-23): PROBADO EN MÁQUINA REAL, OK.**
   Primera corrida: el fix funcionó (zig 0.17.0 descargado, ly pinneada a
   `bccddcda`) pero `zig build` falló con `unable to unpack git files:
   ReadFailed` en la dep `translate-c` (codeberg): caida transitoria de red que
@@ -356,5 +356,5 @@ termina con `[Error] Neither sway nor Hyprland detected, terminating` y no
 muestra GUI. Niri no tiene panel gráfico de displays (lo oficial es
 `niri-output` por terminal o keybinds).
 **Fix:** se quitó `nwg-displays` de las listas de instalación (01/02/03) y
-de desinstalación (04/05/06). En la box genmachine-test se removió con
+de desinstalación (04/05/06). En la box de pruebas se removió con
 `apt-get remove -y nwg-displays`.
