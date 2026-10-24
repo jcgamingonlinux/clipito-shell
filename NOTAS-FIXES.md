@@ -314,8 +314,17 @@ Publicado como fork: `https://github.com/jcgamingonlinux/clipito-shell` (main).
      un extracto anterior parcial).
 - **Verificado (gateway, 2026-10-24):** zig 0.17.0 + ly v1.5.0 → `zig build`
   rc=0, binario en `zig-out/bin/ly` (29 MB); con zig 0.16.0 el mismo build da
-  rc=2 con los errores citados. Pendiente: re-run del instalador en la box
-  forky (192.168.1.14) — la máquina estaba reinstalando forky base.
+  rc=2 con los errores citados.
+- **Test forky (box 192.168.1.5, 2026-10-23):** el fix funcionó (zig 0.17.0
+  descargado, ly pinneada a `bccddcda`) pero `zig build` falló con
+  `unable to unpack git files: ReadFailed` en la dep `translate-c` (codeberg):
+  caida transitoria de red que deja el cache de zig (~/.cache/zig) parcialmente
+  poblado — reintentar sin limpiar el cache falla igual. Retry manual con cache
+  limpia → rc=0, binario de 27 MB en ~2 min.
+- **Fix 2 (retry, 02 y 03):** `zig build` ahora corre hasta 3 intentos; a cada
+  fallo limpia `~/.cache/zig` y reintenta; si los 3 fallan, mensaje claro y
+  `exit 1`. Esto convierte el flake de red en un auto-recovery en vez de un
+  "el script no termina".
 
 ### 18. [MENOR] 05/06 — uninstallers: paths de `ly` errados/incompletos y servicio no deshabilitado
 - **Problema:** `installexe` de `ly` (prefix por defecto `/usr`) instala

@@ -1255,8 +1255,27 @@ install_selected() {
                     git clone --depth 1 --branch v1.5.0 https://codeberg.org/fairyglade/ly.git \
                         || check_error "No se pudo clonar ly (v1.5.0)."
                     cd /tmp/ly/
-                    /opt/zig-x86_64-linux-0.17.0/zig build \
-                        || check_error "Fallo al compilar ly (zig build)."
+                    # `zig build` hace fetch de deps git (translate-c desde
+                    # codeberg) y una caida de red deja el cache de zig
+                    # parcialmente poblado ("unable to unpack git files:
+                    # ReadFailed"): reintentar sin limpiar el cache falla igual.
+                    # Estrategia: hasta 3 intentos; a cada fallo limpia el
+                    # cache (~/.cache/zig) y reintenta. (fix 2026-10-23, test
+                    # forky: fallo transitorio de red, retry con cache limpia OK)
+                    local ly_build_ok=1
+                    local ly_attempt
+                    for ly_attempt in 1 2 3; do
+                        if /opt/zig-x86_64-linux-0.17.0/zig build; then
+                            ly_build_ok=0
+                            break
+                        fi
+                        echo ">> zig build fallo (intento $ly_attempt de 3). Limpiando cache de zig y reintentando..."
+                        rm -rf "$HOME/.cache/zig"
+                    done
+                    if [ "$ly_build_ok" -ne 0 ]; then
+                        echo "Error: Fallo al compilar ly (zig build, 3 intentos). Probable problema de red al fetchear dependencias git."
+                        exit 1
+                    fi
                     sudo /opt/zig-x86_64-linux-0.17.0/zig build installexe \
                         || check_error "Fallo al instalar ly (zig build installexe)."
                     sudo systemctl enable --force ly@tty2.service
