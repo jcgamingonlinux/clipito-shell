@@ -305,6 +305,7 @@ BACKUPDIR="$HOME/.config-backup/$DATE"
 pkgs_mango_niri=(
     curl
     gpg
+    build-essential
     wayland-protocols
     libinput-dev
     libdrm-dev

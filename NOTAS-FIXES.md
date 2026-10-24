@@ -369,3 +369,21 @@ muestra GUI.
   `setsid wdisplays` en la sesión niri el proceso queda VIVO (GUI abierta),
   a diferencia de nwg-displays que terminaba al instante.
 - En la box se removió nwg-displays y se instaló wdisplays manualmente.
+
+## Fix 20 — mango/scenefx sin compilador C: "Unknown compiler(s)" en meson (2026-10-24)
+
+**Síntoma:** en la box forky (genmachine-test, instalación de los 4 WMs) el
+instalador abortaba en el primer WM compilable (mango) con:
+`meson.build:1:0: ERROR: Unknown compiler(s): [['cc'], ['gcc'], ['clang'], ...]`
+(`Error: No se pudo compilar scenefx (meson build).`).
+**Causa:** `pkgs_mango_niri` no instalaba ningún compilador C. `build-essential`
+solo se instala en la fase de DM (ly), que corre DESPUÉS de los WMs; y los
+otros WMs (hyprland/sway/niri) no se compilan (van de .deb/apt), así que el
+compilador nunca existía cuando meson necesitaba `cc`.
+**Fix:** agregar `build-essential` a `pkgs_mango_niri` (03-install-forky.sh) —
+el arreglo lo comparten los caminos mango y niri.
+- **Verificado en la box:** todos los módulos pkg-config requeridos por
+  scenefx 0.5.0 (wayland-server, wlroots-0.20, libdrm, xkbcommon, pixman-1) y
+  mango 0.17.5 (xcb, xcb-icccm, xcb-randr, libinput, wayland-client,
+  libpcre2-8, libcjson, pangocairo) ya estaban OK; el único faltante era el
+  compilador. `scenefx-0.5` queda FALTA hasta que se compila scenefx (esperado).
