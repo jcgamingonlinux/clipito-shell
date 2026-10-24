@@ -182,7 +182,6 @@ BACKUPDIR="$HOME/.config-backup/$DATE"
         firefox
         gvfs
         mtpfs
-        network-manager-applet
         pavucontrol
         playerctl
         thunar
@@ -269,7 +268,6 @@ BACKUPDIR="$HOME/.config-backup/$DATE"
         ttf-jetbrains-mono-nerd
 	    libnotify
         mtpfs
-	    network-manager-applet
 	    nwg-look
         pavucontrol
         playerctl

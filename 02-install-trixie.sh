@@ -185,7 +185,6 @@ BACKUPDIR="$HOME/.config-backup/$DATE"
         gvfs-fuse
         lxpolkit
         mtp-tools
-        network-manager-applet
         pavucontrol
         playerctl
         pulseaudio-utils
@@ -293,7 +292,6 @@ BACKUPDIR="$HOME/.config-backup/$DATE"
         lxpolkit
         mtp-tools
         network-manager-gnome
-	    network-manager-applet
 	    nwg-look
         pavucontrol
         playerctl

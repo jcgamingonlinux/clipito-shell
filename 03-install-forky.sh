@@ -200,9 +200,13 @@ BACKUPDIR="$HOME/.config-backup/$DATE"
         gdebi
     )
 
-    ###  este paquete me instala cinnamon como dependencia
-    ###  así le diga que no instale los recomendados
-    ###  network-manager-applet
+    ###  network-manager-applet fuera de la lista (2026-10-24):
+    ###  en forky depende de "policykit-1-gnome | polkit-1-auth-agent" y el
+    ###  unico proveedor del virtual es cinnamon → apt arrastra el escritorio
+    ###  completo + lightdm (que se auto-activa y roba el default a ly).
+    ###  En los WMs de clipito no hay tray host que lo muestre; la red se
+    ###  maneja con nmtui. (Si se quiere volver a instalar, agregar también
+    ###  un proveedor chico de polkit-1-auth-agent si existe en la distro.)
 
     # File manager: thunar (en pkgs_wm_wayland). Verificado en forky
     # (2026-10-24): no arrastra cinnamon. pcmanfm quedó descartado
@@ -278,7 +282,6 @@ BACKUPDIR="$HOME/.config-backup/$DATE"
 	    imagemagick
 	    libnotify-bin
         mtp-tools
-	    network-manager-applet
 	    nwg-look
         pavucontrol
         playerctl
