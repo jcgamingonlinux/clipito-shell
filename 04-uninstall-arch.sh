@@ -95,7 +95,7 @@ PKGS=(
     # --- WM (comunes) ---
     adwaita-icon-theme breeze breeze-gtk noto-fonts-emoji git imagemagick
     ttf-jetbrains-mono-nerd libnotify kvantum sound-theme-freedesktop swaylock
-    wlr-randr yad zenity quickshell
+    wlr-randr yad zenity wdisplays quickshell
     # --- hyprland ---
     hyprland hyprland-guiutils kitty xorg-xwayland xdg-desktop-portal-hyprland
     xdg-desktop-portal-gtk

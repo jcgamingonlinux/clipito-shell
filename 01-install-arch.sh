@@ -284,6 +284,7 @@ BACKUPDIR="$HOME/.config-backup/$DATE"
 	    xdg-user-dirs
         yad
        	zenity
+       	wdisplays
        	pipewire
 	    pipewire-alsa
 	    pipewire-pulse

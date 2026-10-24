@@ -315,6 +315,7 @@ BACKUPDIR="$HOME/.config-backup/$DATE"
 
 
     pkgs_wm_wayland_backports=(
+	wdisplays
 	pipewire
 	pipewire-alsa
 	pipewire-pulse

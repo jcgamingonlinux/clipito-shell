@@ -347,14 +347,25 @@ Publicado como fork: `https://github.com/jcgamingonlinux/clipito-shell` (main).
 - **Verificado:** `bash -n` OK; se confirmará con un uninstall real en la box
   forky tras el test del instalador.
 
-## Fix 19 — nwg-displays sin soporte para niri (2026-10-23)
+## Fix 19 — nwg-displays sin soporte para niri → reemplazo por wdisplays (2026-10-23)
 
 **Síntoma:** el ítem "Displays Settings" del menú (quickshell niri-bar) no
 abría nada al clickear.
 **Causa:** `nwg-displays` (0.3.28) solo soporta sway y Hyprland; en niri
 termina con `[Error] Neither sway nor Hyprland detected, terminating` y no
-muestra GUI. Niri no tiene panel gráfico de displays (lo oficial es
-`niri-output` por terminal o keybinds).
-**Fix:** se quitó `nwg-displays` de las listas de instalación (01/02/03) y
-de desinstalación (04/05/06). En la box de pruebas se removió con
-`apt-get remove -y nwg-displays`.
+muestra GUI.
+**Fix:** reemplazar `nwg-displays` por `wdisplays` en los 6 scripts
+(instalación 01/02/03 y desinstalación 04/05/06).
+- `wdisplays` usa el protocolo `wlr-output-management-unstable-v1`; los que lo
+  implementan conocidos son Sway, Wayfire, Hyprland y **niri** (niri lo añadió
+  en el commit `43df7fad`, 2024-05-21 → cualquier niri moderno, incl. el 26.04
+  de la box, lo soporta).
+- Disponibilidad: Arch `extra` 1.1.3-2, trixie main 1.1.1-1+b2, forky main
+  1.1.3-1. (No está en AUR; sí `wdisplays-git`.)
+- En trixie va en `pkgs_wm_wayland_backports`, que se instala con
+  `apt install -y` normal (sin `-t trixie-backports`), así que no hay conflicto
+  de repositorio.
+- **Verificado en la box de pruebas (niri 26.04):** con
+  `setsid wdisplays` en la sesión niri el proceso queda VIVO (GUI abierta),
+  a diferencia de nwg-displays que terminaba al instante.
+- En la box se removió nwg-displays y se instaló wdisplays manualmente.
