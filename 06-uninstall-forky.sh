@@ -96,7 +96,7 @@ PKGS=(
     audacity build-essential cava cmatrix devscripts fonts-font-awesome
     fonts-roboto gnumeric gparted inkscape inxi mediainfo neovim sox vlc gimp
     # --- WM (comunes) ---
-    adwaita-icon-theme breeze-gtk-theme fonts-noto-color-emoji git imagemagick
+    adwaita-icon-theme blueman breeze-gtk-theme fonts-noto-color-emoji git imagemagick
     libnotify-bin network-manager-applet nwg-look qt-style-kvantum-themes
     quickshell sound-theme-freedesktop swaylock thunar wlr-randr xwayland
     yad zenity

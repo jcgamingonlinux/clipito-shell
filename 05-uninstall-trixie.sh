@@ -82,7 +82,7 @@ echo ">> Iniciando desinstalación... (registro: $LOGFILE)"
 ################################################
 PKGS=(
     # --- básico ---
-    acpi alsa-utils curl gpg desktop-base fastfetch ffmpeg firefox-esr
+    acpi alsa-utils blueman curl gpg desktop-base fastfetch ffmpeg firefox-esr
     gvfs gvfs-backends gvfs-fuse lxpolkit mtp-tools network-manager-applet
     network-manager-gnome pavucontrol playerctl pulseaudio-utils synaptic
     thunar unrar-free xdg-user-dirs xfce4-screenshooter xorg xterm xserver-xorg

@@ -420,3 +420,25 @@ renderer`) ocurre al probar mango SIN sesión de seat (SSH o desde el greeter
 X de lightdm): el nodo render es `root:render 660` y la ACL la pone logind
 solo para el usuario de la sesión activa. Desde ly@tty2 (sesión real) mango
 inicia bien.
+
+## Fix 22 — blueman (UI de bluetooth) + mask de DMs ajenos al elegido (2026-10-24)
+
+**Síntoma 1 (bluetooth):** en la box (genmachine-test) el panel de Bluetooth
+del bar de niri mostraba "Encendido" pero "Buscar dispositivos" no encontraba
+nada. Verificación: el stack funciona (hci0 UP, Powered: yes, firmware
+Realtek RTL8852BE OK; un `bluetoothctl scan on` detectó la balanza Xiaomi
+S400 que había cerca). El panel no la encontró porque el scan del panel es
+corto (~8s) y la balanza solo hace advertise intermitente. Sin embargo el
+sistema no tenía manager completo para emparejar/colocar dispositivos
+(GUI: solo el widget del bar).
+**Fix:** `blueman` agregado a `pkgs_base` en 01/02/03 (en forky arrastra
+solo python3-gi-cairo; en Arch es extra). Queda en 04/05/06 para desinstalar.
+
+**Síntoma 2 (DM):** tras reboot, la box mostraba el greeter de GDM en tty1
+aunque `ly@tty2` estaba enabled y gdm "disabled". La imagen base de GenMachines
+viene con GNOME completo (gnome-shell, gdm3, etc.): gdm arranca al boot vía
+graphical.target sin importar el enablement; el `systemctl disable` que hacía
+el instalador no bastaba.
+**Fix:** la fase de DM ahora hace `systemctl mask` de gdm/gdm3/lightdm/sddm
+(no-elegidos) y `unmask` del elegido (01/02/03). En la box ya quedó aplicado
+a mano: gdm+gdm3 masked, ly@tty2 es el único DM.

@@ -176,6 +176,7 @@ BACKUPDIR="$HOME/.config-backup/$DATE"
         acpi
         alsa-utils
         base-devel
+        blueman
 	    curl
         fastfetch
         ffmpeg
@@ -1115,15 +1116,15 @@ install_selected() {
         if [[ ${SEL_DM[$k]} -eq 1 ]]; then
             echo ">> Instalando DM $k..."
 
-	    ###  primero deshabilito el display manager activo si es que hay alguno
-	    if [ -z "$(systemctl list-units --type=service | grep -i "display manager")" ]; then
-		    echo "parece que no hay un display manager activo"
-	    else
-		    echo "deshabilito el display manager activo"
-	            buscarDM=$(systemctl list-units --type=service | grep -i "display manager")
-		    DM=$(echo $buscarDM | awk '{print $1}')
-		    sudo systemctl disable $DM
-	    fi
+	    ###  dejo SOLO el DM elegido: mask de los demas DM conocidos.
+	    ###  (fix 2026-10-24: imagenes base con GNOME traen gdm "baked in" que
+	    ###   arranca al boot sin importar el enablement; el disable solo no
+	    ###   bastaba y el greeter de GDM robaba la consola. Mask garantiza que
+	    ###   no arranque; unmask+enable del elegido deja un unico DM.)
+	    sudo systemctl unmask "$k" 2>/dev/null || true
+	    for otro_dm in gdm gdm3 lightdm sddm; do
+	        [ "$otro_dm" != "$k" ] && sudo systemctl mask "$otro_dm" 2>/dev/null || true
+	    done
 
             case "$k" in
                 lightdm)
