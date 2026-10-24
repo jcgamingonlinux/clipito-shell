@@ -186,6 +186,9 @@ BACKUPDIR="$HOME/.config-backup/$DATE"
         gvfs-fuse
         lxpolkit
         mtp-tools
+        # (2026-10-24) proveedor REAL del virtual que necesita blueman
+        # (Depends: notification-daemon); sin esto apt elige cinnamon.
+        notification-daemon
         pavucontrol
         playerctl
         pulseaudio-utils
@@ -292,6 +295,7 @@ BACKUPDIR="$HOME/.config-backup/$DATE"
 	    libnotify-bin
         lxpolkit
         mtp-tools
+        notification-daemon
         network-manager-gnome
 	    nwg-look
         pavucontrol

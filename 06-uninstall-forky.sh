@@ -97,8 +97,8 @@ PKGS=(
     fonts-roboto gnumeric gparted inkscape inxi mediainfo neovim sox vlc gimp
     # --- WM (comunes) ---
     adwaita-icon-theme blueman breeze-gtk-theme fonts-noto-color-emoji git imagemagick
-    libnotify-bin network-manager-applet nwg-look qt-style-kvantum-themes
-    quickshell sound-theme-freedesktop swaylock thunar wlr-randr xwayland
+    libnotify-bin network-manager-applet notification-daemon nwg-look qt-style-kvantum-themes
+    quickshell sound-theme-freedesktop swaylock thunar wlr-randr xfce-polkit xwayland
     yad zenity
     # --- niri (debs del repo + deps de compilación) ---
     wayland-protocols hwdata seatd pango1.0-tools meson wayland-utils

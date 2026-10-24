@@ -186,6 +186,10 @@ BACKUPDIR="$HOME/.config-backup/$DATE"
         gvfs-backends
         gvfs-fuse
         mtp-tools
+        # (2026-10-24) proveedor REAL del virtual que necesita blueman
+        # (Depends: notification-daemon). Sin esto apt lo resuelve con
+        # cinnamon y arrastra el escritorio GNOME completo + lightdm.
+        notification-daemon
         pavucontrol
         playerctl
         pulseaudio-utils
@@ -283,6 +287,9 @@ BACKUPDIR="$HOME/.config-backup/$DATE"
 	    imagemagick
 	    libnotify-bin
         mtp-tools
+        # proveedor chico de polkit-1-auth-agent (thunar lo Recommends;
+        # sin un provider explicito apt elige cinnamon).
+        xfce-polkit
 	    nwg-look
         pavucontrol
         playerctl

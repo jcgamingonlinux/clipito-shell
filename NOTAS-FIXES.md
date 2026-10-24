@@ -456,3 +456,29 @@ gnome-flashback + xdg-desktop-portal-gnome, todos del stack de la imagen).
 Thunar queda como único file manager. El icono del menú se refresca
 reiniciando `qs` (el bar cachea la lista de .desktop al arrancar) o con el
 próximo login. Si alguna vez se arma la bench desde imagen GNOME, repetir.
+
+## Fix 23 — cinnamon arrastrado por virtuales de polkit/notification (2026-10-24)
+
+**Síntoma:** en la box (forky) aparecieron en el menú de login las sesiones de
+cinnamon/cinnamon2d/cinnamon-wayland y la app "Backgrounds" (gnome-backgrounds)
+aunque el instalador no instala cinnamon.
+**Causa:** dos cadenas de virtuales (verificado contra el Packages de forky):
+- `blueman` → `Depends: notification-daemon` (virtual). Providers: el paquete
+  real `notification-daemon` (3.20.0-5) **o** `cinnamon`. apt eligió cinnamon
+  en la corrida de las 00:59 (no es determinista).
+- `thunar` → `Recommends: policykit-1-gnome | polkit-1-auth-agent`. En forky no
+  existe `policykit-1-gnome`; providers del virtual: cinnamon, gnome-shell,
+  xfce-polkit, etc. apt eligió cinnamon.
+Cinnamon arrastra muffin+nemo+lightdm (auto) + gnome-backgrounds → 2 "extras"
+en el menú (sesiones cinnamon + app Backgrounds que no funciona fuera de
+cinnamon).
+**Fix:** fijar los providers reales ligeros:
+- `notification-daemon` (paquete real) en `pkgs_base` de 02/03.
+- `xfce-polkit` en `pkgs_wm_wayland` de 03 (02 ya traía `lxpolkit`, su
+  equivalente en trixie).
+- Desinstaladores 05/06: `notification-daemon` (+ `xfce-polkit` en 06).
+- Arch (01/04): sin cambio — pacman no tiene esos virtuales (verificado: deps
+  de blueman/thunar son concretas).
+En la box se limpió a mano: `apt remove cinnamon` (0 paquetes extra salieron) +
+`autoremove` (gnome-backgrounds, tint2, etc.) + `apt remove lightdm`. Quedan
+solo las sesiones de mango y niri; `ly@.service` enabled.
