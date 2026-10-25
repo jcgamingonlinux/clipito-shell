@@ -631,3 +631,52 @@ botones quedan dentro, con 8px de respiro inferior.
   (md5 9fb9f9e6703cb70316179ed306f17356).
 **Verificado:** en forky, con el popup abierto y el panel de contraseña
 visible, los botones quedan dentro del recuadro.
+
+## Fix 29 — Popup/indicador Bluetooth: `adapter.devices` no es array JS (2026-10-25)
+
+**Síntoma:** el indicador BT de la barra tiraba
+`TypeError: Property 'filter' of object UntypedObjectModel is not a
+function` y el hint "Sin dispositivos emparejados..." del popup nunca
+aparecía.
+**Causa:** en quickshell 0.3.2, `adapter.devices` es un
+`UntypedObjectModel` (QAbstractListModel), no un array JS. El array JS
+está en `.values` (QObjectList). `.filter()` y `.length` no existen en
+el modelo. (Verificado contra
+`/usr/lib/x86_64-linux-gnu/qt6/qml/Quickshell/Bluetooth/quickshell-bluetooth.qmltypes`.)
+**Fix:** `adapter.devices.filter(...)` → `adapter.devices.values.filter(...)`
+(BTIndicator, las 4 barras) y `adapter.devices.length === 0` →
+`adapter.devices.values.length === 0` (BTPopup, las 4 barras). La línea
+`model: root.available ? root.adapter.devices : []` del ListView queda
+como estaba: un `QAbstractListModel` es un modelo válido para `model`.
+**Verificado:** tras re-lanzar `qs`, el TypeError desapareció del log y
+el hint aparece en el popup (captura).
+
+## Fix 30 — Scan del popup BT: la discovery se detenía sola (2026-10-25)
+
+**Síntoma:** el botón "Buscar dispositivos (8s)" no encontraba nada,
+incluso con el dispositivo en modo descubrible; blueman sí los veía.
+**Causa:** en BlueZ >= 5.66 la discovery es "propiedad" del cliente
+D-Bus que la inició: cuando ese cliente se desconecta,
+`btd_adapter_discovery_disconnect()` detiene el escaneo (verificado en
+`src/adapter.c` de bluez 5.87, líneas 2471/2552/2877). El comando del
+popup era `timeout 8 bluetoothctl scan on`: `bluetoothctl` en forma de
+argumentos **sale enseguida** si stdin no es TTY (EOF inmediato), así
+que la discovery empezaba y moría en el mismo instante. Confirmando:
+log `--debug` de bluetoothd muestra
+`start_discovery() → trigger_start_discovery() → discovery_disconnect()
+owner :1.852` en el mismo segundo; y `bluetoothctl show` daba
+`Discovering: no` durante todo el "scan".
+**Fix:** comando por stdin con pipe vivo:
+`sh -c "(printf 'scan on\n'; sleep 8) | bluetoothctl >/dev/null 2>&1"`
+— bluetoothctl envía el comando y se queda 8s vivo como owner; al
+cerrar el pipe sale y BlueZ detiene el scan solo. Los dispositivos
+encontrados aparecen solos en `adapter.devices` (el modelo escucha los
+cambios de BlueZ). Aplicado a las 4 barras (QML idénticos).
+**Verificado:** con el comando nuevo, `busctl get-property ...
+Discovering` da `b true` durante los 8s y bluetoothctl imprime
+`Discovery started`.
+**Nota:** también se descartó un problema de hardware/servicio: dongle
+Realtek RTL8852BU (1-3), reset por unbind/bind y HCI reset; el error
+`adv_monitor ... Unexpected NULL` del journal es cosmético (el Adv
+Monitor Manager se saltea por "LE unavailable" al arrancar y no se
+reintenta), no afectaba a la discovery.
