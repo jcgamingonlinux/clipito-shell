@@ -506,7 +506,7 @@ nmcli -t -f SSID,SIGNAL,SECURITY dev wifi list 2>/dev/null
             Rectangle {
                 visible: root.pendingSsid.length > 0
                 Layout.fillWidth: true
-                implicitHeight: pwCol.implicitHeight + 2 * Scaling.px(8)  # (fix 28) márgenes de pwCol
+                implicitHeight: pwCol.implicitHeight + 2 * Scaling.px(8)  // (fix 28) márgenes de pwCol
                 color: "#181825"
                 border.color: "#45475a"
                 border.width: Scaling.px(1)
