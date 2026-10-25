@@ -1242,15 +1242,19 @@ install_selected() {
 
                 ly)
                     # (fix 26, 2026-10-24) ly v1.5.0 se instala como .deb
-                    # precompilado (release/debian/ly_1.5.0-1_amd64.deb):
+                    # precompilado; (fix 27, 2026-10-25) la version 1.5.0-2
+                    # trae el set COMPLETO de files que instala `zig build
+                    # installexe` (release/debian/ly_1.5.0-2_amd64.deb):
                     # sin zig, sin git clone, sin fetch de deps git (los
                     # fallos de red que obligaban a reintentar el build).
-                    # El .deb trae /usr/bin/ly + el unit template ly@.service;
-                    # el postinst hace enable+restart de ly@tty2. El binario
-                    # pide solo GLIBC_2.36 como maximo: sirve para trixie y
-                    # forky por igual (un unico .deb para ambos).
+                    # El .deb trae /usr/bin/ly, los units ly@.service /
+                    # ly-kmsconvt@.service, el arbol /etc/ly (setup.sh,
+                    # config.ini, startup.sh, lang/, custom-sessions/)
+                    # y los PAM /etc/pam.d/ly; el postinst hace enable+restart
+                    # de ly@tty2. El binario pide solo GLIBC_2.36 como maximo:
+                    # sirve para trixie y forky por igual (un unico .deb).
                     cd $REPOLOCAL/release/debian
-                    sudo apt install -y ./ly_1.5.0-1_amd64.deb
+                    sudo apt install -y ./ly_1.5.0-2_amd64.deb
                     sudo systemctl enable --force ly@tty2.service
 		    ;;
 

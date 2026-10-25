@@ -581,3 +581,32 @@ red (fallo transitorio de codeberg → 3 reintentos con cache limpia; gate
 manual (binario + unit + enable), se instaló el .deb con `apt install` y
 quedó `ly 1.5.0-1` instalado, `ly@tty2` enabled+active con el proceso
 corriendo en tty2.
+
+## Fix 27 — ly .deb incompleto: faltaba todo /etc/ly (2026-10-25)
+
+**Síntoma:** tras reinstalar la box con el instalador del fix 26, `ly`
+autenticaba bien en tty2 pero no lanzaba la sesión: el log
+(`/var/log/ly.log`) mostraba `executing: /bin/bash -c /etc/ly/setup.sh
+niri-session` y un segundo después `logged out`. `/etc/ly/` estaba vacío
+y no existían `/etc/pam.d/ly`.
+**Causa:** el .deb 1.5.0-1 solo empaquetaba `/usr/bin/ly` +
+`ly@.service`. Al desinstalar la copia manual (build de fuente) se
+llevaron todos los archivos de config que `zig build installexe`
+instala, y el .deb no los re-ponía: `ly` cargaba el config embebido por
+default (que apunta a `/etc/ly/setup.sh`, etc.) y el comando de setup
+desaparecía al instante (script inexistente).
+**Fix:** `ly_1.5.0-2_amd64.deb` en `release/debian/` (reemplaza a
+1.5.0-1) con el set completo replicando `installexe`:
+`/usr/bin/ly`, `ly@.service` + `ly-kmsconvt@.service` (patcheados),
+`/etc/ly/` completo (`setup.sh` 755, `config.ini` + `config.ini.example`
+patcheados, `startup.sh` 755, `example.dur`/`example.lua` 755,
+`custom-sessions/README`, `lang/` con los 25 idiomas) y `/etc/pam.d/ly`
++ `ly-autologin`. Los placeholders `$CONFIG_DIRECTORY`/`$PREFIX_DIRECTORY`/
+`$EXECUTABLE_NAME` reemplazados a mano como hace el instalador de ly
+(`/etc`, `/usr`, `ly`).
+- 02 y 03: `apt install ./ly_1.5.0-2_amd64.deb`.
+**Verificado:** en la box forky, `apt install` de 1.5.0-2 sobre 1.5.0-1:
+`/etc/ly/` completo, `bash -n setup.sh` OK, config.ini con
+`setup_cmd = /etc/ly/setup.sh`, `ly@tty2` activo (el log de TUI carga
+sin errores; el `x11 session directory FileNotFound` es inofensivo,
+config solo-Wayland).
