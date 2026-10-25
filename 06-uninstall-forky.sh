@@ -114,8 +114,9 @@ PKGS=(
     hyprland hyprland-guiutils kitty xdg-desktop-portal-hyprland
     # --- display managers ---
     lightdm lightdm-gtk-greeter sddm sddm-theme-maui
-    # --- ly (compilación) ---
-    libpam0g-dev libxcb-xkb-dev xauth brightnessctl
+    # --- ly (paquete .deb desde fix 26; el resto son deps de compilacion
+    #     de instaladores viejos que lo compilaban con zig) ---
+    ly libpam0g-dev libxcb-xkb-dev xauth brightnessctl
     # --- scrcpy (compilación) ---
     libsdl2-2.0-0 adb gcc pkg-config ninja-build libsdl2-dev libavcodec-dev
     libavdevice-dev libavformat-dev libavutil-dev libswresample-dev libusb-1.0-0

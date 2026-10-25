@@ -1241,49 +1241,16 @@ install_selected() {
                     ;;
 
                 ly)
-
-                    if [ -d "/tmp/ly" ]; then
-                        echo "borrando directorio temporal de ly"
-                        sudo rm -rf "/tmp/ly"
-                    fi
-
-                    sudo apt install -y build-essential libpam0g-dev libxcb-xkb-dev xauth \
-			                xserver-xorg brightnessctl git wget
-                    cd /tmp
-                    # ly (fairyglade) requiere zig 0.17.x: el gate
-                    # minimum_zig_version=0.17.0 en build.zig.zon (v1.5.0 y master)
-                    # hace fallar `zig build` con zig 0.16.0 (fix 2026-10-24).
-                    wget "https://ziglang.org/download/0.17.0/zig-x86_64-linux-0.17.0.tar.xz" \
-                        || check_error "No se pudo descargar zig 0.17.0."
-                    sudo rm -rf "/opt/zig-x86_64-linux-0.17.0"
-                    sudo tar -xvf zig-x86_64-linux-0.17.0.tar.xz -C /opt
-                    # tag v1.5.0: última versión liberada (master es 1.6.0 sin liberar)
-                    git clone --depth 1 --branch v1.5.0 https://codeberg.org/fairyglade/ly.git \
-                        || check_error "No se pudo clonar ly (v1.5.0)."
-                    cd /tmp/ly/
-                    # `zig build` hace fetch de deps git (translate-c desde
-                    # codeberg) y una caida de red deja el cache de zig
-                    # parcialmente poblado ("unable to unpack git files:
-                    # ReadFailed"): reintentar sin limpiar el cache falla igual.
-                    # Estrategia: hasta 3 intentos; a cada fallo limpia el
-                    # cache (~/.cache/zig) y reintenta. (fix 2026-10-23, test
-                    # forky: fallo transitorio de red, retry con cache limpia OK)
-                    local ly_build_ok=1
-                    local ly_attempt
-                    for ly_attempt in 1 2 3; do
-                        if /opt/zig-x86_64-linux-0.17.0/zig build; then
-                            ly_build_ok=0
-                            break
-                        fi
-                        echo ">> zig build fallo (intento $ly_attempt de 3). Limpiando cache de zig y reintentando..."
-                        rm -rf "$HOME/.cache/zig"
-                    done
-                    if [ "$ly_build_ok" -ne 0 ]; then
-                        echo "Error: Fallo al compilar ly (zig build, 3 intentos). Probable problema de red al fetchear dependencias git."
-                        exit 1
-                    fi
-                    sudo /opt/zig-x86_64-linux-0.17.0/zig build installexe \
-                        || check_error "Fallo al instalar ly (zig build installexe)."
+                    # (fix 26, 2026-10-24) ly v1.5.0 se instala como .deb
+                    # precompilado (release/debian/ly_1.5.0-1_amd64.deb):
+                    # sin zig, sin git clone, sin fetch de deps git (los
+                    # fallos de red que obligaban a reintentar el build).
+                    # El .deb trae /usr/bin/ly + el unit template ly@.service;
+                    # el postinst hace enable+restart de ly@tty2. El binario
+                    # pide solo GLIBC_2.36 como maximo: sirve para trixie y
+                    # forky por igual (un unico .deb para ambos).
+                    cd $REPOLOCAL/release/debian
+                    sudo apt install -y ./ly_1.5.0-1_amd64.deb
                     sudo systemctl enable --force ly@tty2.service
 		    ;;
 

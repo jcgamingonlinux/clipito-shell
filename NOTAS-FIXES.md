@@ -555,3 +555,29 @@ lista de WiFi no mostraba nombres (filas vacías).
 - Delegate: `model.ssid` → `modelData.ssid` (y señal/securidad).
 **Verificado:** con LAN cableada activa y NM marcándola `unmanaged`, el
 popup muestra "LAN: <interfaz>" y la lista de WiFi con SSIDs/señal/candado.
+
+## Fix 26 — ly como .deb precompilado en release/debian/ (2026-10-24)
+
+**Síntoma:** el instalador compilaba `ly` (TUI display manager, tty2) de
+fuente en cada instalación: descarga de zig 0.17.0, `git clone` v1.5.0 y
+`zig build` que fetchea dependencias git — lento y con puntos de falla de
+red (fallo transitorio de codeberg → 3 reintentos con cache limpia; gate
+`minimum_zig_version=0.17.0` que rompía el zig 0.16 del repositorio).
+**Fix:**
+- `ly_1.5.0-1_amd64.deb` en `release/debian/`: binario `/usr/bin/ly` +
+  unit template `ly@.service` + postinst (`systemctl enable --force
+  ly@tty2` + restart) + postrm (disable/stop; purge limpia el symlink de
+  enable). `Depends` calculado desde `ldd`: solo libs básicas de Debian
+  (libpam0g, libxcb1, libaudit1, libxau6, libxdmcp6, libcap-ng0,
+  util-linux, xauth) — **sin wlroots**, así que UN SOLO .deb sirve para
+  trixie y forky (el binario pide como máximo GLIBC_2.36; verificado con
+  `objdump -T` sobre forky/glibc 2.43).
+- 02 y 03: el bloque `ly)` ahora hace `apt install ./ly_1.5.0-1_amd64.deb`
+  desde `release/debian/` (sin zig/clone/build).
+- 05 y 06: `ly` agregado al array de paquetes a purgar (antes solo se
+  borraban archivos sueltos + deps de compilación, que siguen en la lista
+  por los instaladores viejos).
+**Verificado:** en una máquina de test (forky) se desinstaló la copia
+manual (binario + unit + enable), se instaló el .deb con `apt install` y
+quedó `ly 1.5.0-1` instalado, `ly@tty2` enabled+active con el proceso
+corriendo en tty2.
