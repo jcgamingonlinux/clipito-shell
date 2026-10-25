@@ -712,3 +712,19 @@ apaga lo que aplica a layer-shell.
 `config.conf.bak-20261025-layeranim`; `mango -p` sin errores); el mango
 actual arrancó con la config nueva tras un reboot espontáneo de la box.
 JC confirmó: "desapareció la sombra y el delay".
+
+## Fix 32 — Paridad arch-dotfiles vs debian-dotfiles (2026-10-25)
+
+**Motivo:** pedido de JC tras el fix de mango ("fijate si no hay arreglos que esten en arch y no en debian"). Auditoría completa: `diff -rq` entre `arch-dotfiles/` y `debian-dotfiles/` + git log de cada archivo con diferencias.
+
+**Resultado:** ningún fix 24-31 quedó afuera de debian (los fixes viven en `.config/quickshell/`, una sola tree compartida, y en los instaladores 01/02/03 que ya distinguen por-OS). El único fix en dotfiles por-OS era el mango (Fix 31), ya aplicado en las dos copias.
+
+**Diferencias viejas (de los dotfiles originales) que sí eran "está en arch y no en debian" → sincronizadas:**
+
+1. **`hypr/hyprland.lua` — polkit agent:** en Arch se arrancaba el agent al iniciar hypr (`polkit-gnome-authentication-agent-1`); en Debian estaba comentado (`-- hl.exec_cmd("lxpolkit")`). Ahora en debian arranca el agent que el instalador realmente instala (trixie: `lxpolkit`, forky: `xfce-polkit`), con una línea que prueba ambos para que el ausente falle en silencio. En Arch no se tocó: el instalador 01 ni instala `polkit-gnome`, así que esa línea allá probablemente es un no-op.
+2. **`sway/config.d/50-systemd-user.conf` — `XDG_CURRENT_DESKTOP=sway`:** la versión de Arch lo setea explícito en el env de systemd user (workaround FS#63021 + `set-environment` + `dbus-update-activation-environment`); la de Debian era la simplificada (solo `import-environment`). Quedó sincronizada a la versión completa.
+
+**Lo que queda distinto (intencional, no es fix faltante):**
+
+- Solo en debian: stub `hypr/hyprland.conf` (lo necesita hyprland) y variantes viejas de niri (`01-config.kdl`, `config-arch/`, `config-sid/`) — inofensivas: niri solo lee el `config.kdl` de arriba, que es **idéntico** en ambos árboles.
+- `sway/config`: en debian hay un `exec lxpolkit &` que en arch no existe (dirección contraria; en forky ese binario no existe, es no-op). No tocado por no ampliar el alcance.
