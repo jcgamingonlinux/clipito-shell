@@ -22,12 +22,16 @@ Rectangle {
     MouseArea { anchors.fill: parent; onClicked: {} }
 
     function startScan() {
-        // "bluetoothctl scan on" para emparejar dispositivos nuevos no es
-        // parte de la API de Quickshell -- se dispara por línea de
-        // comandos con un timeout, y los dispositivos que va encontrando
-        // aparecen solos en adapter.devices (Quickshell escucha los
-        // cambios de BlueZ por D-Bus).
-        scanner.command = ["sh", "-c", "timeout 8 bluetoothctl scan on >/dev/null 2>&1"]
+        // La discovery es "propiedad" del cliente D-Bus que la inició
+        // (BlueZ >= 5.66): cuando ese cliente se desconecta, el escaneo
+        // se detiene. "bluetoothctl scan on" (forma argumentos) sale
+        // enseguida si stdin no es TTY, así que la discovery nunca
+        // quedaba activa. Solución: enviar el comando por stdin y
+        // mantener el pipe abierto 8s; al cerrar el pipe, bluetoothctl
+        // sale y BlueZ detiene el scan solo. Los dispositivos que se
+        // encuentran aparecen solos en adapter.devices (Quickshell
+        // escucha los cambios de BlueZ por D-Bus).
+        scanner.command = ["sh", "-c", "(printf \'scan on\\n\'; sleep 8) | bluetoothctl >/dev/null 2>&1"]
         scanner.running = true
     }
     Process { id: scanner }
