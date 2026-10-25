@@ -898,6 +898,15 @@ install_selected() {
         fi
     done
 
+    # (fix 24, 2026-10-24) NetworkManager (network-manager-gnome en
+    # pkgs_wm_wayland) toma la red: si el sistema trae dhcpcd como unit,
+    # se desactiva para que no haya doble cliente DHCP sobre la misma
+    # interfaz.
+    if systemctl list-unit-files 2>/dev/null | grep -q "^dhcpcd"; then
+        echo ">> Desactivando dhcpcd (NetworkManager toma la red)"
+        sudo systemctl disable --now dhcpcd 2>/dev/null || true
+    fi
+
     #############################################
 
     # descargar los dot-files del repo de gitlab

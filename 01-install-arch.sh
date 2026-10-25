@@ -183,6 +183,9 @@ BACKUPDIR="$HOME/.config-backup/$DATE"
         firefox
         gvfs
         mtpfs
+        # (fix 24, 2026-10-24) NetworkManager: da nmcli para el
+        # NetworkPopup de quickshell (ver/conectar/cambiar WiFi)
+        networkmanager
         pavucontrol
         playerctl
         thunar
@@ -835,6 +838,14 @@ install_selected() {
             esac
         fi
     done
+
+    # (fix 24, 2026-10-24) networkmanager (pkgs_base) toma la red: si la
+    # imagen trae dhcpcd corriendo, se detiene para que no haya doble
+    # cliente DHCP sobre la misma interfaz.
+    if systemctl is-active dhcpcd >/dev/null 2>&1; then
+        echo ">> Deteniendo dhcpcd (networkmanager toma la red)"
+        sudo systemctl disable --now dhcpcd 2>/dev/null || true
+    fi
 
     #############################################
     # descargar los dot-files del repo de gitlab

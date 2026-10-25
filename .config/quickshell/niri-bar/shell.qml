@@ -585,7 +585,9 @@ ShellRoot {
             color: "transparent"
 
             WlrLayershell.layer: WlrLayer.Overlay
-            WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
+            // (fix 24, 2026-10-24) Exclusive para que el TextField del
+            // NetworkPopup reciba teclas (contraseña), como el launcher
+            WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
             WlrLayershell.exclusiveZone: -1
             WlrLayershell.namespace: "niri-bar-network-popup"
 
@@ -607,8 +609,9 @@ ShellRoot {
                 anchors.left: parent.left
                 y: BarConfig.barAtBottom ? (parent.height - height - Scaling.px(36)) : Scaling.px(36)
                 anchors.leftMargin: Math.min(Math.max(8, BarPositions.lanX + BarPositions.lanWidth / 2 - width / 2), parent.width - width - 8)
-                width: Scaling.px(190)
-                height: Scaling.px(100)
+                // (fix 24, 2026-10-24) tamaño del nuevo popup de red (WiFi)
+                width: Scaling.px(340)
+                height: Scaling.px(560)
             }
         }
     }

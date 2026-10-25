@@ -186,6 +186,11 @@ BACKUPDIR="$HOME/.config-backup/$DATE"
         gvfs-backends
         gvfs-fuse
         mtp-tools
+        # (fix 24, 2026-10-24) NetworkManager SOLO core (sin applet): da
+        # nmcli para que el NetworkPopup de quickshell muestre/conecte
+        # redes WiFi y permita cambiar de conexion. El core no tiene deps
+        # de virtuales problemáticos (el applet sí, ver mas abajo).
+        network-manager
         # (2026-10-24) proveedor REAL del virtual que necesita blueman
         # (Depends: notification-daemon). Sin esto apt lo resuelve con
         # cinnamon y arrastra el escritorio GNOME completo + lightdm.
@@ -207,11 +212,14 @@ BACKUPDIR="$HOME/.config-backup/$DATE"
 
     ###  network-manager-applet fuera de la lista (2026-10-24):
     ###  en forky depende de "policykit-1-gnome | polkit-1-auth-agent" y el
-    ###  unico proveedor del virtual es cinnamon → apt arrastra el escritorio
-    ###  completo + lightdm (que se auto-activa y roba el default a ly).
-    ###  En los WMs de clipito no hay tray host que lo muestre; la red se
-    ###  maneja con nmtui. (Si se quiere volver a instalar, agregar también
-    ###  un proveedor chico de polkit-1-auth-agent si existe en la distro.)
+    ###  unico proveedor chico del virtual es cinnamon → apt arrastra el
+    ###  escritorio completo + lightdm (que se auto-activa y roba el default
+    ###  a ly). Por eso se instala solo el core (network-manager) en
+    ###  pkgs_base; la red se maneja desde el NetworkPopup de quickshell
+    ###  (fix 24) o con nmtui. (Si se quiere el applet de vuelta, agregar
+    ###  también un proveedor chico de polkit-1-auth-agent — p. ej.
+    ###  xfce-polkit — en la MISMA transacción apt, como hace 02-trixie
+    ###  con lxpolkit.)
 
     # File manager: thunar (en pkgs_wm_wayland). Verificado en forky
     # (2026-10-24): no arrastra cinnamon. pcmanfm quedó descartado
@@ -875,6 +883,15 @@ install_selected() {
             esac
         fi
     done
+
+    # (fix 24, 2026-10-24) NetworkManager ya esta instalado (pkgs_base):
+    # si el sistema trae dhcpcd (imagenes cloud/GNOME) se desactiva para que
+    # no haya doble cliente DHCP sobre la misma interfaz. El lease actual
+    # sigue valido hasta que NM tome la interfaz (NM arranca solo en el boot).
+    if systemctl list-unit-files 2>/dev/null | grep -q "^dhcpcd"; then
+        echo ">> Desactivando dhcpcd (NetworkManager toma la red)"
+        sudo systemctl disable --now dhcpcd 2>/dev/null || true
+    fi
 
     #############################################
     # descargar los dot-files del repo de gitlab

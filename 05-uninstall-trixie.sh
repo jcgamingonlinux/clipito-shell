@@ -83,8 +83,8 @@ echo ">> Iniciando desinstalación... (registro: $LOGFILE)"
 PKGS=(
     # --- básico ---
     acpi alsa-utils blueman curl gpg desktop-base fastfetch ffmpeg firefox-esr
-    gvfs gvfs-backends gvfs-fuse lxpolkit mtp-tools network-manager-applet
-    network-manager-gnome notification-daemon pavucontrol playerctl pulseaudio-utils synaptic
+    gvfs gvfs-backends gvfs-fuse lxpolkit mtp-tools network-manager network-manager-applet
+    nm-connection-editor network-manager-gnome notification-daemon pavucontrol playerctl pulseaudio-utils synaptic
     thunar unrar-free xdg-user-dirs xfce4-screenshooter xorg xterm xserver-xorg
     # --- backports (audio + varios) ---
     pipewire pipewire-alsa pipewire-pulse wireplumber gdebi wdisplays

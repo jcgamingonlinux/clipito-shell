@@ -482,3 +482,51 @@ cinnamon).
 En la box se limpió a mano: `apt remove cinnamon` (0 paquetes extra salieron) +
 `autoremove` (gnome-backgrounds, tint2, etc.) + `apt remove lightdm`. Quedan
 solo las sesiones de mango y niri; `ly@.service` enabled.
+
+## Fix 24 — Popup de red de quickshell sin WiFi (2026-10-24)
+
+**Síntoma:** el applet de red de la barra solo mostraba "IP local"
+(NetworkPopup.qml de 190×100 px, `keyboardFocus: None` en la ventana): no
+había forma de ver/conectar redes WiFi ni cambiar de conexión.
+**Causa:** dos cosas faltaban:
+1. **No existía NetworkManager**: los instaladores no instalaban ningún
+   gestor de red (en la box la ethernet la manejaba ifupdown/dhcpcd y el
+   WiFi no tenía gestión). `network-manager-applet` estaba fuera de las
+   listas desde el fix 23 (arrastra el virtual `policykit-1-gnome |
+   polkit-1-auth-agent` → cinnamon en forky).
+2. **El popup no tenía UI de WiFi**: solo corrió `ip -4 -o addr` y no
+   recibía teclado (ventana `WlrLayershell.keyboardFocus: None`).
+**Fix:**
+- **`network-manager` (SOLO core, sin applet)** en `pkgs_base` de 01
+  (`networkmanager` en arch) y 03 (forky). El core no tiene deps de
+  virtuales (verificado en forky: `libnm0, dbus, ...`; `wpasupplicant`
+  llega por Recommends). 02-trixie ya traía `network-manager-gnome`
+  (core+applet+editor) en `pkgs_wm_wayland`: OK porque en la MISMA
+  transacción apt resuelve el virtual polkit con `lxpolkit` (que ya está
+  en la lista), no con cinnamon.
+- **NetworkPopup.qml reescrito** (las 4 barras: niri/mango/hyprland/sway,
+  340×560 px):
+  - Conexión actual: WiFi (SSID) y/o LAN (nombre de conexión) vía
+    `nmcli dev status`; fallback a /sys/class/net si no hay NM (como el
+    indicador).
+  - Lista de redes WiFi: `nmcli -t -f SSID,SIGNAL,SECURITY dev wifi list`
+    (señal + candado; ocultas se tipean a mano).
+  - Conectar (con contraseña si hace falta: `nmcli dev wifi connect
+    SSID password PASS`), desconectar (`nmcli dev disconnect DEV`),
+    ON/OFF del radio (`nmcli radio wifi`), estado ✓/✗ de la última acción.
+  - `keyboardFocus: Exclusive` en la ventana contenedora (igual que el
+    launcher) para que el TextField reciba teclas; Escape cierra/cancela.
+  - Auto-refresco cada 15 s mientras está abierto.
+- **Uninstallers**: 04 agrega `networkmanager`; 05 agrega
+  `network-manager` + `nm-connection-editor`; 06 agrega `network-manager`.
+- **Guards de dhcpcd** en 01/02/03: si existe el unit `dhcpcd` se
+  desactiva al instalar el pack base (evita doble cliente DHCP cuando NM
+  toma la red).
+**Verificado en la box (192.168.1.17, forky, niri):** `apt install
+network-manager` → NM active, `wpa_supplicant` active, `nmcli dev wifi
+list` ve la red `Angel:75:WPA2` como usuario `test` (D-Bus OK sin
+polkit interactivo). La ethernet quedó `unmanaged` en NM: no pelea con
+ifupdown/dhcpcd y la conexión SSH no se toca.
+**NOTA:** en la box, dhcpcd NO es unit de systemd (lo levanta ifupdown
+desde /etc/network/interfaces), por eso los guards no lo tocan ahí; en
+imágenes limpias donde SÍ sea unit, el guard lo desactiva.
