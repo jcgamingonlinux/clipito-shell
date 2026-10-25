@@ -506,7 +506,7 @@ nmcli -t -f SSID,SIGNAL,SECURITY dev wifi list 2>/dev/null
             Rectangle {
                 visible: root.pendingSsid.length > 0
                 Layout.fillWidth: true
-                implicitHeight: pwCol.implicitHeight
+                implicitHeight: pwCol.implicitHeight + 2 * Scaling.px(8)  # (fix 28) márgenes de pwCol
                 color: "#181825"
                 border.color: "#45475a"
                 border.width: Scaling.px(1)
@@ -538,7 +538,6 @@ nmcli -t -f SSID,SIGNAL,SECURITY dev wifi list 2>/dev/null
                             border.color: pwField.activeFocus ? "#89b4fa" : "#45475a"
                             border.width: Scaling.px(1)
                         }
-                        onAccepted: root.doConnect(pwField.text)
                         Keys.onReturnPressed: root.doConnect(pwField.text)
                         Keys.onEscapePressed: {
                             root.pendingSsid = ""

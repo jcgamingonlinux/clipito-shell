@@ -610,3 +610,24 @@ patcheados, `startup.sh` 755, `example.dur`/`example.lua` 755,
 `setup_cmd = /etc/ly/setup.sh`, `ly@tty2` activo (el log de TUI carga
 sin errores; el `x11 session directory FileNotFound` es inofensivo,
 config solo-Wayland).
+
+## Fix 28 — Popup de red: botones Conectar/Cancelar fuera del recuadro (2026-10-25)
+
+**Síntoma:** en el panel de contraseña de WiFi, los botones "Conectar" y
+"Cancelar" se desbordaban ~16px por debajo del borde del recuadro
+(confirmado en captura de la box: niri, popup abierto, red "Angel").
+**Causa:** el `Rectangle` del panel usaba
+`implicitHeight: pwCol.implicitHeight`, pero el `ColumnLayout` interior
+(`pwCol`) tiene `anchors.margins: Scaling.px(8)`. El `implicitHeight` del
+layout es la altura natural del contenido (sin márgenes), así que el
+Rectangle quedaba 16px más chico que su contenido (8 arriba + 8 abajo) y
+la última fila (los botones) salía del recuadro.
+**Fix:** `implicitHeight: pwCol.implicitHeight + 2 * Scaling.px(8)`
+(suma los márgenes). Así el Rectangle cubre contenido+márgenes y los
+botones quedan dentro, con 8px de respiro inferior.
+- De paso: se quitó el `onAccepted` duplicado del `pwField` (Enter ya
+  dispara `Keys.onReturnPressed`; los dos handlers re-lanzaban `connProc`).
+- Aplicado a las 4 barras (niri/mango/hyprland/sway) — QML idénticos
+  (md5 9fb9f9e6703cb70316179ed306f17356).
+**Verificado:** en forky, con el popup abierto y el panel de contraseña
+visible, los botones quedan dentro del recuadro.
