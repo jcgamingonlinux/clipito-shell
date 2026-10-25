@@ -372,7 +372,7 @@ muestra GUI.
 
 ## Fix 20 — mango/scenefx sin compilador C: "Unknown compiler(s)" en meson (2026-10-24)
 
-**Síntoma:** en la box forky (genmachine-test, instalación de los 4 WMs) el
+**Síntoma:** en la box forky (máquina de test, instalación de los 4 WMs) el
 instalador abortaba en el primer WM compilable (mango) con:
 `meson.build:1:0: ERROR: Unknown compiler(s): [['cc'], ['gcc'], ['clang'], ...]`
 (`Error: No se pudo compilar scenefx (meson build).`).
@@ -390,7 +390,7 @@ el arreglo lo comparten los caminos mango y niri.
 
 ## Fix 21 — network-manager-applet arrastra cinnamon + lightdm (2026-10-24)
 
-**Síntoma:** box forky (genmachine-test) con los 4 WMs instalados: el boot
+**Síntoma:** box forky (máquina de test) con los 4 WMs instalados: el boot
 mostraba el greeter de lightdm (slick) en vez de ly@tty2, y el sistema tenía
 todo el escritorio Cinnamon (16+ paquetes) instalado.
 **Causa:** `network-manager-applet` (en la lista base de 01/02/03) depende de
@@ -423,7 +423,7 @@ inicia bien.
 
 ## Fix 22 — blueman (UI de bluetooth) + mask de DMs ajenos al elegido (2026-10-24)
 
-**Síntoma 1 (bluetooth):** en la box (genmachine-test) el panel de Bluetooth
+**Síntoma 1 (bluetooth):** en la box (máquina de test) el panel de Bluetooth
 del bar de niri mostraba "Encendido" pero "Buscar dispositivos" no encontraba
 nada. Verificación: el stack funciona (hci0 UP, Powered: yes, firmware
 Realtek RTL8852BE OK; un `bluetoothctl scan on` detectó la balanza Xiaomi
@@ -522,11 +522,36 @@ había forma de ver/conectar redes WiFi ni cambiar de conexión.
 - **Guards de dhcpcd** en 01/02/03: si existe el unit `dhcpcd` se
   desactiva al instalar el pack base (evita doble cliente DHCP cuando NM
   toma la red).
-**Verificado en la box (192.168.1.17, forky, niri):** `apt install
+**Verificado en una máquina real (forky, niri):** `apt install
 network-manager` → NM active, `wpa_supplicant` active, `nmcli dev wifi
-list` ve la red `Angel:75:WPA2` como usuario `test` (D-Bus OK sin
+list` ve una red WiFi real como usuario normal (D-Bus OK sin
 polkit interactivo). La ethernet quedó `unmanaged` en NM: no pelea con
 ifupdown/dhcpcd y la conexión SSH no se toca.
-**NOTA:** en la box, dhcpcd NO es unit de systemd (lo levanta ifupdown
-desde /etc/network/interfaces), por eso los guards no lo tocan ahí; en
-imágenes limpias donde SÍ sea unit, el guard lo desactiva.
+**NOTA:** en esa máquina, dhcpcd NO es unit de systemd (lo levanta
+ifupdown desde /etc/network/interfaces), por eso los guards no lo tocan
+ahí; en imágenes limpias donde SÍ sea unit, el guard lo desactiva.
+
+## Fix 25 — Popup de red: LAN `unmanaged` no aparecía + SSIDs en blanco (2026-10-24)
+
+**Síntoma:** con LAN cableada activa, el popup decía "Sin conexión" y la
+lista de WiFi no mostraba nombres (filas vacías).
+**Causa:** dos bugs distintos en el NetworkPopup del fix 24:
+1. **LAN `unmanaged`:** cuando NM está instalado pero deja la ethernet
+   `unmanaged` (la maneja ifupdown/dhcpcd), `nmcli dev status` la reporta
+   como `unmanaged` (no `connected`) → el estado LAN del popup quedaba
+   vacío. El fallback a /sys/class/net solo corría cuando NO había NM.
+2. **Delegate del ListView:** el modelo es un array JS (`property var
+   wifiList: []`), no un ListModel. El delegate usaba `model.ssid`/`model.signal`/`model.sec`,
+   que en un array JS resuelven a `undefined` (lo correcto es `modelData.*`) →
+   los Text de SSID/señal se pintaban vacíos.
+**Fix (las 4 barras):**
+- `statusScript`: además de `nmcli dev status`, SIEMPRE lee el operstate
+  de /sys/class/net (excl. lo) y emite `FBDEV:<dev>:wifi|eth` para cada
+  interfaz `up`. El QML deduplica: una FBDEV solo cuenta si NM no la
+  reporta como `connected`.
+- `currentStatusText()`/`anyConnected()`: ahora muestran/cuentan la LAN
+  no gestionada por NM (vía /sys) como `LAN: <dev>`, no solo las
+  conexiones que NM dice `connected`.
+- Delegate: `model.ssid` → `modelData.ssid` (y señal/securidad).
+**Verificado:** con LAN cableada activa y NM marcándola `unmanaged`, el
+popup muestra "LAN: <interfaz>" y la lista de WiFi con SSIDs/señal/candado.

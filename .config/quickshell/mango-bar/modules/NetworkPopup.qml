@@ -33,6 +33,7 @@ Rectangle {
     property string fbLine: ""       // fallback /sys cuando no hay NM
     property var wifiList: []        // [{ssid, signal, sec}]
     property var lanLines: []        // "dev: ip" (como el popup anterior)
+    property var nmConnectedDevs: [] // devices que NM reporta connected
     property string pendingSsid: ""  // red en espera de contraseña
     property string pendingSec: ""   // su seguridad ("" = abierta)
     property string hiddenSsid: ""   // red oculta tipeada a mano
@@ -49,19 +50,20 @@ if command -v nmcli >/dev/null 2>&1; then
     nmcli -t -f DEVICE,TYPE,STATE,CONNECTION dev status 2>/dev/null
 else
     printf 'NM:0\n'
-    for i in /sys/class/net/*/operstate; do
-        dev=$(basename "$(dirname "$i")")
-        [ "$dev" = "lo" ] && continue
-        st=$(cat "$i" 2>/dev/null)
-        if [ "$st" = "up" ]; then
-            if [ -d "/sys/class/net/$dev/wireless" ]; then
-                printf 'FBDEV:%s:wifi\n' "$dev"
-            else
-                printf 'FBDEV:%s:eth\n' "$dev"
-            fi
-        fi
-    done
 fi
+# Interfaces up por /sys (excl. lo). NM puede dejarlas "unmanaged"
+# (ifupdown/dhcpcd), así que el QML las deduplica contra lo que
+# NM reporta como conectado.
+for i in /sys/class/net/*/operstate; do
+    dev=$(basename "$(dirname "$i")")
+    [ "$dev" = "lo" ] && continue
+    [ "$(cat "$i" 2>/dev/null)" = "up" ] || continue
+    if [ -d "/sys/class/net/$dev/wireless" ]; then
+        printf 'FBDEV:%s:wifi\n' "$dev"
+    else
+        printf 'FBDEV:%s:eth\n' "$dev"
+    fi
+done
 `
 
     readonly property string wifiScript: `
@@ -81,9 +83,14 @@ nmcli -t -f SSID,SIGNAL,SECURITY dev wifi list 2>/dev/null
                 if (t.length === 0) return
                 if (t === "SCAN") {
                     // inicio de un scan nuevo: reseteo para no traer restos
+                    root.nmAvailable = false
+                    root.wifiRadioOn = false
                     root.wifiSsid = ""
+                    root.wifiDev = ""
                     root.ethConn = ""
+                    root.ethDev = ""
                     root.fbLine = ""
+                    root.nmConnectedDevs = []
                     return
                 }
                 if (t === "NM:1") { root.nmAvailable = true; return }
@@ -93,8 +100,12 @@ nmcli -t -f SSID,SIGNAL,SECURITY dev wifi list 2>/dev/null
                     return
                 }
                 if (t.startsWith("FBDEV:")) {
+                    // solo si NM no la tiene conectada (dedup)
                     let v = t.slice(6)
-                    root.fbLine = root.fbLine === "" ? v : root.fbLine + ", " + v
+                    let idx = v.indexOf(":")
+                    let fdev = idx > 0 ? v.slice(0, idx) : v
+                    if (root.nmConnectedDevs.indexOf(fdev) < 0)
+                        root.fbLine = root.fbLine === "" ? v : root.fbLine + ", " + v
                     return
                 }
                 // líneas "dev:type:state:conexión"
@@ -104,12 +115,16 @@ nmcli -t -f SSID,SIGNAL,SECURITY dev wifi list 2>/dev/null
                 let type = parts[1]
                 let state = parts[2]
                 let conn = parts.slice(3).join(":")
-                if (type === "wifi") {
-                    root.wifiDev = dev
-                    root.wifiSsid = (state === "connected") ? conn : ""
-                } else if (type === "ethernet") {
-                    root.ethDev = dev
-                    root.ethConn = (state === "connected") ? conn : ""
+                if (type === "wifi" || type === "ethernet") {
+                    let connected = (state.indexOf("connected") === 0)
+                    if (type === "wifi") {
+                        root.wifiDev = dev
+                        root.wifiSsid = connected ? conn : ""
+                    } else {
+                        root.ethDev = dev
+                        root.ethConn = connected ? conn : ""
+                    }
+                    if (connected) root.nmConnectedDevs = root.nmConnectedDevs.concat([dev])
                 }
             }
         }
@@ -236,19 +251,32 @@ nmcli -t -f SSID,SIGNAL,SECURITY dev wifi list 2>/dev/null
 
     function anyConnected() {
         return root.wifiSsid.length > 0 || root.ethConn.length > 0
-               || (root.nmAvailable === false && root.fbLine.length > 0)
+               || root.fbLine.length > 0
+    }
+
+    // Textualiza la línea de fallback ("dev: eth, dev2: wifi" → "LAN: dev · WiFi: dev2")
+    function fbStatusText() {
+        if (root.fbLine.length === 0) return ""
+        let parts = []
+        let entries = root.fbLine.split(", ")
+        for (let j = 0; j < entries.length; j++) {
+            let e = entries[j]
+            let idx = e.lastIndexOf(":")
+            let dev = idx > 0 ? e.slice(0, idx) : e
+            let type = idx > 0 ? e.slice(idx + 1) : "eth"
+            parts.push((type === "wifi" ? "WiFi: " : "LAN: ") + dev)
+        }
+        return parts.join("  ·  ")
     }
 
     function currentStatusText() {
-        if (root.nmAvailable) {
-            let parts = []
-            if (root.wifiSsid.length > 0) parts.push("WiFi: " + root.wifiSsid)
-            if (root.ethConn.length > 0) parts.push("LAN: " + root.ethConn)
-            if (parts.length === 0) return "Sin conexión"
-            return parts.join("  ·  ")
-        }
-        if (root.fbLine.length > 0) return "Red activa: " + root.fbLine + " (sin NetworkManager)"
-        return "Sin conexión"
+        let parts = []
+        if (root.wifiSsid.length > 0) parts.push("WiFi: " + root.wifiSsid)
+        if (root.ethConn.length > 0) parts.push("LAN: " + root.ethConn)
+        let fb = root.fbStatusText()
+        if (fb.length > 0) parts.push(fb)
+        if (parts.length === 0) return "Sin conexión"
+        return parts.join("  ·  ")
     }
 
     // ─── apertura / teclado ──────────────────────────────────
@@ -377,9 +405,9 @@ nmcli -t -f SSID,SIGNAL,SECURITY dev wifi list 2>/dev/null
                 delegate: Item {
                     width: wifiView.width
                     height: Scaling.px(22)
-                    property string ssid: model.ssid
-                    property string signal: model.signal
-                    property string sec: model.sec
+                    property string ssid: modelData.ssid
+                    property string signal: modelData.signal
+                    property string sec: modelData.sec
 
                     Rectangle {
                         anchors.fill: parent
