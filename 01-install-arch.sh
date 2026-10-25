@@ -965,6 +965,15 @@ install_selected() {
     cp bar-layout.tsv launcher-size.txt wallpaper-fillmode.txt wallpaper-path.txt ~/.config/quickshell || check_error "No se pudieron copiar los archivos de configuracion del WC de quickshell"
     cp $REPOLOCAL/wallpapers/clipito-01.png ~/wallpapers || check_error "No se pudieron copiar los archivos de configuracion del WC de quickshell"
 
+    # (2026-10-25) El popup de BT de la barra (Quickshell) ya gestiona
+    # el scan/emparejo, así que se deshabilita el autostart del tray de
+    # blueman para no tener dos iconos de Bluetooth en la barra
+    # (override XDG de usuario del /etc/xdg/autostart/blueman.desktop).
+    # El paquete sigue instalado: notification-daemon lo necesita
+    # (ver pkgs_base) y queda el GUI blueman-manager disponible.
+    mkdir -p "$HOME/.config/autostart"
+    printf '[Desktop Entry]\nHidden=true\n' > "$HOME/.config/autostart/blueman.desktop"
+
 
     # Crear directorios del home del usuario
     echo "Creando directorios del home del usuario..."
