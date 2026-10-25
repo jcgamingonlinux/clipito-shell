@@ -15,7 +15,7 @@ Item {
     readonly property bool available: root.adapter !== null && root.adapter !== undefined
     readonly property bool btEnabled: root.available && root.adapter.enabled
     readonly property var connectedDevices: root.available
-        ? root.adapter.devices.filter(function(d) { return d.state === BluetoothDeviceState.Connected })
+        ? root.adapter.devices.values.filter(function(d) { return d.state === BluetoothDeviceState.Connected })
         : []
 
     function reportPos() {

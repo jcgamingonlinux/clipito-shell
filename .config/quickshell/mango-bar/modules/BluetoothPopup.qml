@@ -137,7 +137,7 @@ Rectangle {
         }
 
         Text {
-            visible: root.available && root.adapter.enabled && root.adapter.devices.length === 0
+            visible: root.available && root.adapter.enabled && root.adapter.devices.values.length === 0
             text: "Sin dispositivos emparejados. Usá \"Buscar dispositivos\" o emparejá con bluetoothctl."
             color: "#9399b2"
             wrapMode: Text.Wrap
