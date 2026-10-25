@@ -680,3 +680,35 @@ Realtek RTL8852BU (1-3), reset por unbind/bind y HCI reset; el error
 `adv_monitor ... Unexpected NULL` del journal es cosmético (el Adv
 Monitor Manager se saltea por "LE unavailable" al arrancar y no se
 reintenta), no afectaba a la discovery.
+
+## Fix 31 — Popups: "ventana gigante transparente" al abrir (mango-bar, 2026-10-25)
+
+**Síntoma (video de JC):** al abrir el launcher (y el resto de popups),
+parecía que se abría una "ventana gigante transparente con sombra" que
+permanecía un segundo y luego desaparecía; además el contenido tardaba
+~570 ms en pintarse tras el click.
+**Diagnóstico:** PPM burst a ~43 fps + frames del video a 30 fps:
+- NO hay overlay a pantalla completa: una zona lejana a la tarjeta no
+cambia de brillo en ningún frame (mean ≈ 62 constante) → la PanelWindow
+full-screen transparente de Quickshell no es la culpable en sí.
+- La tarjeta (LauncherPopup 420×952) se pinta con **fade-in** (~66→111 de
+brillo en la zona de la tarjeta entre frames) y llega desplazada por un
+**slide** — ambas impuestas por **MangoWM**, no por el QML: la config
+traía `layer_animations=1` + `layer_animation_type_open=slide`
+(duración `animation_duration_open=400`) + `layer_shadows=1`
+(`shadows_size=12`, `shadows_blur=15`). El compositor anima/sombrea la
+superficie layer-shell como si fuera una ventana normal, y mientras el
+QML aún no pinta el contenido se ve la superficie transparente + la
+sombra → "ventana gigante transparente con sombra".
+**Fix:** en `~/.config/mango/config.conf` (y en
+`arch-dotfiles/mango/config.conf` del repo):
+- `layer_shadows = 0` (antes `1`) — sin sombra en superficies layer-shell.
+- `layer_animations=0` (antes `1`) — sin slide/fade de apertura/cierre
+de layers; la tarjeta aparece completa e instantánea.
+Las líneas `layer_animation_type_open/close` quedan sin efecto (inofensivas).
+Las animaciones de ventanas normales (`animations=1`) no se tocan: solo se
+apaga lo que aplica a layer-shell.
+**Verificado:** aplicado en la box (backup
+`config.conf.bak-20261025-layeranim`; `mango -p` sin errores); el mango
+actual arrancó con la config nueva tras un reboot espontáneo de la box.
+JC confirmó: "desapareció la sombra y el delay".
