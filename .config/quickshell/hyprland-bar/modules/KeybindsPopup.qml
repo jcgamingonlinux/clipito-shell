@@ -29,9 +29,9 @@ import Quickshell.Io
 Rectangle {
     id: root
     color: "#1e1e2e"
-    radius: 8
+    radius: Scaling.px(8)
     border.color: "#313244"
-    border.width: 1
+    border.width: Scaling.px(1)
 
     property bool open: false
     signal closeRequested()

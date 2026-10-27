@@ -321,7 +321,7 @@ Rectangle {
                 required property var modelData
                 required property int index
                 width: list.width
-                height: delegateRoot.modelData.isSeparator ? 28 : 40
+                height: delegateRoot.modelData.isSeparator ? Scaling.px(28) : Scaling.px(40)
 
                 // Separador entre las 8 más usadas (fijas) y el resto
                 // alfabético

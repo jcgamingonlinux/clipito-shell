@@ -88,6 +88,8 @@ PKGS=(
     thunar unrar-free xdg-user-dirs xfce4-screenshooter xorg xterm xserver-xorg
     # --- backports (audio + varios) ---
     pipewire pipewire-alsa pipewire-pulse wireplumber gdebi wdisplays
+    # (Fix 33: instalados explicitamente en 02 fuera del array, via backports)
+    pipewire-bin libpipewire-0.3-0t64 libpipewire-0.3-modules gir1.2-atk-1.0 libatk1.0-0t64
     # --- intermedio ---
     btm btop htop hunspell-es libreoffice libreoffice-gtk3 libreoffice-gtk4
     libreoffice-l10n-es mousepad mpv nuspell ristretto sayonara transmission

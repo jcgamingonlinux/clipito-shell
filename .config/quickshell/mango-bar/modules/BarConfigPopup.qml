@@ -9,7 +9,7 @@ Rectangle {
     color: "#1e1e2e"
     radius: Scaling.px(10)
     border.color: "#45475a"
-    border.width: 1
+    border.width: Scaling.px(1)
     clip: true
 
     function labelFor(id) {

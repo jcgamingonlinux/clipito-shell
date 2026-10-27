@@ -9,7 +9,7 @@ Rectangle {
     color: "#1e1e2e"
     radius: Scaling.px(10)
     border.color: "#45475a"
-    border.width: 1
+    border.width: Scaling.px(1)
 
     function labelFor(id) {
         const names = { menu: "Menú", workspaces: "Espacios", activeWindow: "Ventana activa", cpu: "CPU", ram: "RAM", temp: "Temperatura", volume: "Volumen", network: "Red", systray: "Bandeja", notifications: "Notificaciones", keybinds: "Atajos", config: "Ajustes", battery: "Batería", clock: "Reloj", power: "Energía" }

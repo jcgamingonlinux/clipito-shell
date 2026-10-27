@@ -61,8 +61,8 @@ Rectangle {
 
         GridLayout {
             columns: 7
-            columnSpacing: 4
-            rowSpacing: 4
+            columnSpacing: Scaling.px(4)
+            rowSpacing: Scaling.px(4)
             Layout.fillWidth: true
 
             Repeater {

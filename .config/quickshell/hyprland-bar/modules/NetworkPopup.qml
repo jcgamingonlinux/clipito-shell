@@ -39,6 +39,9 @@ Rectangle {
     property string hiddenSsid: ""   // red oculta tipeada a mano
     property string busy: ""         // acción en curso
     property string lastAction: ""   // "connect" | "disconnect" | "radio"
+    property bool lastRadioOn: false  // intencion del toggle: "nmcli radio wifi on/off"
+                                      // no escribe nada en stdout, asi que el mensaje
+                                      // se decide por la intencion, no por el output (Fix 33)
     property string statusMsg: ""    // último resultado (✓/✗)
 
     // ─── scripts ─────────────────────────────────────────────
@@ -179,7 +182,7 @@ nmcli -t -f SSID,SIGNAL,SECURITY dev wifi list 2>/dev/null
                 } else if (action === "disconnect") {
                     msg = ok ? "✓ Desconectado" : "✗ No se pudo desconectar"
                 } else if (action === "radio") {
-                    msg = ok ? "✓ Wi-Fi " + (t.indexOf("enabled") >= 0 ? "activado" : "apagado")
+                    msg = ok ? "✓ Wi-Fi " + (root.lastRadioOn ? "activado" : "apagado")
                              : "✗ No se pudo cambiar el estado del Wi-Fi"
                 }
                 root.statusMsg = msg
@@ -220,6 +223,7 @@ nmcli -t -f SSID,SIGNAL,SECURITY dev wifi list 2>/dev/null
         if (!root.nmAvailable) return
         let on = !root.wifiRadioOn
         root.lastAction = "radio"
+        root.lastRadioOn = on
         root.busy = on ? "Activando Wi-Fi…" : "Apagando Wi-Fi…"
         connProc.command = ["nmcli", "radio", "wifi", on ? "on" : "off"]
         connProc.running = true
@@ -398,7 +402,7 @@ nmcli -t -f SSID,SIGNAL,SECURITY dev wifi list 2>/dev/null
                 id: wifiView
                 Layout.fillWidth: true
                 Layout.preferredHeight: Scaling.px(168)
-                spacing: 1
+                spacing: Scaling.px(1)
                 clip: true
                 boundsBehavior: Flickable.StopAtBounds
                 model: root.wifiList

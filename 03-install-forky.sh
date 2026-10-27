@@ -229,6 +229,7 @@ BACKUPDIR="$HOME/.config-backup/$DATE"
     pkgs_extra_intermedio=(
         btm
         btop
+        evince
         htop
         hunspell-es
         libreoffice

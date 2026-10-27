@@ -592,7 +592,7 @@ d="$HOME/wallpapers"
                         implicitHeight: Scaling.px(24)
                         radius: Scaling.px(4)
                         color: isActive ? "#313244" : (tabHover.containsMouse ? "#313244" : "transparent")
-                        border.width: isActive ? 1 : 0
+                        border.width: isActive ? Scaling.px(1) : 0
                         border.color: "#89b4fa"
                         Text {
                             id: tabLabel
@@ -659,7 +659,7 @@ d="$HOME/wallpapers"
                         implicitHeight: Scaling.px(22)
                         radius: Scaling.px(4)
                         color: isActive ? "#89b4fa" : (catHover.containsMouse ? "#313244" : "transparent")
-                        border.width: isActive ? 0 : 1
+                        border.width: isActive ? 0 : Scaling.px(1)
                         border.color: "#45475a"
                         Text {
                             id: catLabel
@@ -709,13 +709,13 @@ d="$HOME/wallpapers"
                     anchors.margins: Scaling.px(4)
                     radius: Scaling.px(6)
                     color: delegateRoot.isSelected ? "#313244" : "transparent"
-                    border.width: delegateRoot.isApplied ? 3 : (delegateRoot.isSelected ? 2 : 0)
+                    border.width: delegateRoot.isApplied ? Scaling.px(3) : (delegateRoot.isSelected ? Scaling.px(2) : 0)
                     border.color: delegateRoot.isApplied ? "#a6e3a1" : "#89b4fa"
                     clip: true
 
                     Image {
                         anchors.fill: parent
-                        anchors.margins: (delegateRoot.isApplied || delegateRoot.isSelected) ? 2 : 0
+                        anchors.margins: (delegateRoot.isApplied || delegateRoot.isSelected) ? Scaling.px(2) : 0
                         source: "file://" + delegateRoot.modelData
                         asynchronous: true
                         fillMode: Image.PreserveAspectCrop
@@ -811,13 +811,13 @@ d="$HOME/wallpapers"
                             anchors.margins: Scaling.px(4)
                             radius: Scaling.px(6)
                             color: whDelegateRoot.isSelected ? "#313244" : "transparent"
-                            border.width: whDelegateRoot.isSelected ? 2 : 0
+                            border.width: whDelegateRoot.isSelected ? Scaling.px(2) : 0
                             border.color: "#89b4fa"
                             clip: true
 
                             Image {
                                 anchors.fill: parent
-                                anchors.margins: whDelegateRoot.isSelected ? 2 : 0
+                                anchors.margins: whDelegateRoot.isSelected ? Scaling.px(2) : 0
                                 source: whDelegateRoot.modelData.thumbs.large
                                 asynchronous: true
                                 fillMode: Image.PreserveAspectCrop
@@ -908,7 +908,7 @@ d="$HOME/wallpapers"
                                 radius: Scaling.px(4)
                                 readonly property bool isSelected: root.whSelectedTags.indexOf(modelData.name) !== -1
                                 color: isSelected ? "#89b4fa" : (tagHover.containsMouse ? "#313244" : "transparent")
-                                border.width: isSelected ? 0 : 1
+                                border.width: isSelected ? 0 : Scaling.px(1)
                                 border.color: "#45475a"
 
                                 Text {

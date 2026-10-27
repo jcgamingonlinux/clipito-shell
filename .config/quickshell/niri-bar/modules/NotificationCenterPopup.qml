@@ -46,6 +46,7 @@ Rectangle {
     }
 
     focus: true
+    Keys.onEscapePressed: Bridge.notificationsOpen = false
     Keys.onUpPressed: root.selectedIndex = Math.max(0, root.selectedIndex - 1)
     Keys.onDownPressed: root.selectedIndex = Math.min(Notifications.history.length - 1, root.selectedIndex + 1)
     Keys.onPressed: (event) => {

@@ -10,6 +10,13 @@ Rectangle {
 
     property int secondsLeft: 5
 
+    // Teclado (Fix 33: antes solo se podia con el mouse): Escape cancela,
+    // Return acepta. Este Rectangle gana el foco cuando la ventana del
+    // host (keyboardFocus: Exclusive) queda visible.
+    focus: true
+    Keys.onEscapePressed: PendingAction.cancel()
+    Keys.onEnterPressed: PendingAction.executeNow()
+
     // Absorbe clicks internos (no hace falta que cierre nada, solo evita
     // que el click "atraviese" hacia lo que esté debajo)
     MouseArea {

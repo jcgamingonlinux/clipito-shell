@@ -83,7 +83,7 @@ echo ">> Iniciando desinstalación... (registro: $LOGFILE)"
 PKGS=(
     # --- básico ---
     acpi alsa-utils curl gpg desktop-base fastfetch ffmpeg firefox-esr
-    gvfs gvfs-backends gvfs-fuse mtp-tools pcmanfm pavucontrol playerctl
+    gvfs gvfs-backends gvfs-fuse mtp-tools pavucontrol playerctl
     pulseaudio-utils synaptic unrar-free xdg-user-dirs xfce4-screenshooter
     xorg xterm xserver-xorg
     # --- backports (audio + varios) ---
@@ -91,7 +91,7 @@ PKGS=(
     # --- intermedio ---
     btm btop htop hunspell-es libreoffice libreoffice-gtk3 libreoffice-gtk4
     libreoffice-l10n-es mousepad mpv nuspell ristretto sayonara transmission
-    vim wget
+    vim wget evince
     # --- full ---
     audacity build-essential cava cmatrix devscripts fonts-font-awesome
     fonts-roboto gnumeric gparted inkscape inxi mediainfo neovim sox vlc gimp

@@ -728,3 +728,78 @@ JC confirmó: "desapareció la sombra y el delay".
 
 - Solo en debian: stub `hypr/hyprland.conf` (lo necesita hyprland) y variantes viejas de niri (`01-config.kdl`, `config-arch/`, `config-sid/`) — inofensivas: niri solo lee el `config.kdl` de arriba, que es **idéntico** en ambos árboles.
 - `sway/config`: en debian hay un `exec lxpolkit &` que en arch no existe (dirección contraria; en forky ese binario no existe, es no-op). No tocado por no ampliar el alcance.
+
+## Fix 33 — Pase de calidad completo (QA con subagente GUI/diseño/código, 2026-10-27)
+
+**Motivo:** pedido de JC ("hace un pase de calidad con un subagente experto en interfaz
+gráfica, diseño, programación"). Subagente con contexto limpio hizo review estática de
+las 4 barras (~34k líneas QML), scripts 01-06, `usr/` y `release/debian/`. Sin máquina
+de testeo (la box no respondía en la LAN).
+
+**Verificado contra el código (todo confirmado; el subagente no inventó nada):**
+
+### P0
+- **NetworkPopup (x4): mensaje de radio invertido.** `nmcli radio wifi on/off` no
+  escribe nada en stdout; el mensaje se decidía con `t.indexOf("enabled") >= 0` sobre
+  un stdout vacío → SIEMPRE mostraba "✓ Wi-Fi apagado" (incluso al activarlo).
+  Fix: nueva prop `lastRadioOn` que guarda la intención en `toggleRadio()`; el mensaje
+  se decide por la intención. El estado real se pinta igual (refreshAll relee).
+
+### Deriva entre barras
+- **KeybindsPopup (hyprland + mango):** `radius: 8` / `border.width: 1` hardcoded
+  (sway/niri ya usaban `Scaling.px`). Escalado en ambos.
+
+### P1
+- **NotificationCenterPopup (x4):** no cerraba con Escape (era el único popup con
+  `focus: true` que no lo tenía). Fix: `Keys.onEscapePressed: Bridge.notificationsOpen = false`.
+- **evince:** 01 (arch) y 02 (trixie) lo instalan, 03 (forky) no. Fix: agregado a
+  `pkgs_extra_intermedio` de 03 + a la lista de 06-uninstall. 05-uninstall ya lo traía.
+- **05-uninstall-trixie:** faltaban `pipewire-bin libpipewire-0.3-0t64
+  libpipewire-0.3-modules gir1.2-atk-1.0 libatk1.0-0t64` (02 los instala vía
+  backports fuera del array). Agregados a la lista.
+- **06-uninstall-forky:** traía `pcmanfm` (ya no se instala desde 2026-10-24). Quitado.
+
+### P2 (QoL/diseño)
+- **Píxeles sin escalar** (hallazgos del subagente + 3 más que el grep amplio sacó):
+  - CalendarPopup (x4): `columnSpacing/rowSpacing: 4` → `Scaling.px(4)`
+  - LauncherPopup (x4): altas de delegate `28:40` → `Scaling.px(28)/px(40)`
+  - WallpaperPicker (x4): 7 bordes/márgenes (1/2/3) → `Scaling.px`
+  - NetworkPopup (x4): `spacing: 1` (linea 401) → `Scaling.px(1)`
+  - BarConfigPopup (x4): `border.width: 1` (linea 12) → `Scaling.px(1)`
+  (los `spacing: 0` se dejan: cero no escala)
+- **ConfirmActionPopup (x4):** sin cierre por teclado en una acción destructiva.
+  Fix: `focus: true` + `Keys.onEscapePressed: PendingAction.cancel()` +
+  `Keys.onEnterPressed: PendingAction.executeNow()`.
+
+### OK (lo que el pase verificó y está bien)
+- Sin fugas de timers: los `running: true` persistentes son polling intencional;
+  los popups son PanelWindow siempre-instanciados (los Process no se acumulan).
+- WallpaperPicker (1104 lineas) sólido: guardas de lista vacía, clamp de índice,
+  timeout/429/error en XHR, contador de generación, cache, descarga atómica,
+  resize que nunca agranda, fallback curl→wget.
+- Navegación por teclado en WallpaperPicker completa; WindowList/ActiveWindow
+  manejan campos nulos con fallback.
+- Scripts: `set -euo pipefail`, detección por os-release, backups de dotfiles,
+  04-uninstall-arch maneja huérfanos con `pacman -Qdtq` (no le falta nada).
+
+### Nuevo: `check-bars.sh` (raiz del repo)
+Chequeo pre-release con 2 partes:
+1. **Deriva entre barras:** todo archivo que difiera (o exista solo en una barra)
+   fuera del allowlist documentado → falla. El allowlist (19 archivos por-WS:
+   snippets de config, scripts de helper, modulos con IPC especifico, shell.qml)
+   es la lista canónica de "que puede diferir y por que".
+2. **Píxeles sin escalar:** grep de literales no nulos en `radius/border.width/
+   *Spacing/anchors.margins` sin `Scaling.px` en los modulos de las 4 barras.
+Uso: `bash check-bars.sh` (exit 1 = hallazgos). Correrlo antes de cada release.
+
+### Queda para un futuro (no se hace ahora)
+- **Directorio `shared/` + qmldir:** popups byte-idénticos (Network, Bluetooth,
+  Clock, etc.) viven una sola vez e importados por las 4 barras. Evita que una
+  deriva sea posible (la de KeybindsPopup ya se repitió). Refactor grande.
+- **Popup base reutilizable** (focus + Escape + geometria/colores estandar):
+  unifica el contrato de teclado y la consistencia visual.
+- **Foco visible en el boton por defecto** de ConfirmActionPopup (hoy Enter
+  acepta sin feedback visual de que el boton "Aceptar ahora" es el default).
+- **Versiones de `release/debian/*.deb`:** ly/niri/mango/xwayland-satellite son
+  paquetes de terceros; verificar contra los repos cuando la box este de vuelta
+  (no bloquea: se instalan solo si faltan).
