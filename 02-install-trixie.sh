@@ -1691,25 +1691,13 @@ main() {
 
         case "$action" in
             wm) show_wm_menu ;;
-            *)
-                # Sin WM seleccionado, las demás secciones avisan que falta
-                # el WM y, tras Aceptar, vuelven al menú principal.
-                if ! wm_selected; then
-                    dialog --title "Falta el Window Manager" --msgbox \
-                        "Todavía no seleccionaste ningún Window Manager.\n\nVole al menú principal y elegí primero el WM (opción 1) antes de continuar." \
-                        12 70 || true
-                    continue
-                fi
-                case "$action" in
-                    software) show_software_menu ;;
-                    apps) show_apps_menu ;;
-                    dm) show_dm_menu ;;
-                    summary) show_summary ;;
-                    restore) show_restore_menu ;;
-                    leeme) show_leeme_menu ;;
-                    install) install_selected; exit 0 ;;
-                esac
-                ;;
+            software) show_software_menu ;;
+            apps) show_apps_menu ;;
+            dm) show_dm_menu ;;
+            summary) show_summary ;;
+            restore) show_restore_menu ;;
+            leeme) show_leeme_menu ;;
+            install) install_selected; exit 0 ;;
         esac
     done
 
